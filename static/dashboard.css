@@ -1,0 +1,903 @@
+/* StudyMate Dashboard CSS - Modern Neon Cyberpunk Theme */
+
+:root {
+  --primary-bg: #1a1a2e;
+  --secondary-bg: #16213e;
+  --card-bg: #0f172a;
+  --neon-pink: #ff2a6d;
+  --neon-purple: #bd00ff;
+  --neon-blue: #01c8ee;
+  --neon-cyan: #05d9e8;
+  --neon-gradient: linear-gradient(90deg, #ff2a6d, #bd00ff, #01c8ee);
+  --text-primary: #ffffff;
+  --text-secondary: #b8c1ec;
+  --shadow-glow: 0 0 10px rgba(1, 200, 238, 0.5), 0 0 20px rgba(5, 217, 232, 0.3);
+  --button-gradient: linear-gradient(90deg, #ff2a6d, #01c8ee);
+  --form-bg: rgba(15, 23, 42, 0.9);
+  --border-radius: 15px;
+  --sidebar-width: 250px;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-image: url("background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Updated Logo Container */
+.logo-container {
+  position: absolute;
+  top: 20px; 
+  left: 20px;
+  display: flex;
+  gap: 30px;
+  z-index: 10;
+  animation: fadeInDown 1s ease-out;
+}
+
+.logo-container img {
+  width: 125px; 
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+/* New logo animations */
+.logo-container img:nth-child(1) {
+  animation: logoPulse 2s infinite alternate;
+  animation-delay: 2s;
+}
+
+.logo-container img:nth-child(2) {
+  animation: logoPulse 2s infinite alternate;
+  animation-delay: 4s; /* Second logo starts pulsing 1 second after the first */
+}
+
+@keyframes logoPulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px rgba(234, 0, 255, 0.3));
+  }
+  100% {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 15px rgba(234, 0, 255, 0.8));
+  }
+}
+
+
+/* Make sure footer is responsive */
+@media (max-width: 768px) {
+  .footer {
+    font-size: 16px;
+    bottom: 10px;
+    left: 15px;
+  }
+}
+
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+}
+
+/* Updated Glow Effect for Welcome Title */
+h1.welcome-title {
+  color: #00fdfd;
+  text-align: center;
+  font-size: 38px;
+  margin-bottom: 25px;
+  position: relative;
+  text-shadow: 0 0 5px rgba(5, 217, 232, 0.5), 0 0 15px rgba(5, 217, 232, 0.3);
+  animation: textGlow 2s infinite alternate;
+}
+
+/* Preserve the animated line under welcome title */
+h1.welcome-title::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 80%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff00c8, #00fdfd);
+  transform: translateX(-50%);
+  transform-origin: center;
+  animation: welcomeLinePulse 2s infinite alternate;
+}
+
+/* Keep the welcome line animation */
+@keyframes welcomeLinePulse {
+  from {
+    transform: translateX(-50%) scaleX(0.7);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* New animation specifically for text glow */
+@keyframes textGlow {
+  0% {
+    text-shadow: 0 0 5px rgba(5, 217, 232, 0.5), 0 0 10px rgba(5, 217, 232, 0.3);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(5, 217, 232, 0.8), 0 0 20px rgba(5, 217, 232, 0.5), 0 0 30px rgba(5, 217, 232, 0.3);
+  }
+}
+
+/* Updated Footer styles with text-shadow instead of box-shadow */
+.footer {
+  position: absolute;
+  bottom: 15px;
+  left: 20px;
+  padding: 5px 15px;
+  color: #00fdfd;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 30px;
+  z-index: 5;
+  text-shadow: 0 0 5px rgba(5, 217, 232, 0.5), 0 0 15px rgba(5, 217, 232, 0.3);
+  animation: textGlow 2s infinite alternate;
+  text-align: left;
+  background: none;
+}
+
+/* Preserve the span styling for footer */
+.footer span {
+  position: relative;
+  display: inline-block;
+}
+
+/* Keep the animated line under footer text */
+.footer span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #ff00c8, #00fdfd);
+  transform-origin: center;
+  animation: footerLinePulse 2s infinite alternate;
+}
+
+/* Keep the footer line animation */
+@keyframes footerLinePulse {
+  from {
+    width: 0;
+    opacity: 0.7;
+  }
+  to {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+/* Optional: If you want even more glow effect on hover */
+h1.welcome-title:hover, .footer:hover {
+  text-shadow: 0 0 15px rgba(5, 217, 232, 0.9), 0 0 25px rgba(5, 217, 232, 0.7), 0 0 35px rgba(5, 217, 232, 0.5);
+}
+
+h2 {
+  color: #ff00c8;
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 25px;
+  animation: slideInUp 0.8s ease-out;
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #00fdfd, transparent);
+}
+
+
+/* Button Styles */
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  background: linear-gradient(90deg, #ea00ff, #00eaff);
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(234, 0, 255, 0.3);
+  animation: pulse 2s infinite;
+}
+
+button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(234, 0, 255, 0.5);
+  background: linear-gradient(90deg, #00eaff, #ea00ff);
+}
+
+.btn-primary {
+  background-color: rgba(1, 200, 238, 0.2);
+  border: 1px solid var(--neon-blue);
+}
+
+.btn-secondary {
+  background-color: rgba(189, 0, 255, 0.2);
+  border: 1px solid var(--neon-purple);
+}
+
+form {
+  background-color: rgba(30, 30, 47, 0.6);
+  border-radius: 18px;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 50pxpx;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.5s ease-out;
+  max-height: 490px;
+}
+
+/* Class added via JS when page loads */
+form.animate-in {
+  transform: translateY(0);
+  opacity: 2;
+  animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+  from {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(223, 85, 247, 0.8), 0 0 50px rgba(0, 234, 255, 0.3);
+  }
+}
+
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 15px 12px 40px;
+  border: 1px solid rgba(5, 212, 249, 0.836);
+  border-radius: var(--border-radius);
+  background-color: rgba(15, 23, 42, 0.6);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 2px rgba(5, 217, 232, 0.2);
+  background-color: rgba(22, 33, 62, 0.8);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--neon-cyan);
+  font-weight: 500;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--neon-cyan);
+  pointer-events: none;
+}
+
+.form-group input::placeholder {
+  color: rgba(184, 193, 236, 0.6);
+}
+
+/* Calendar Styles */
+.calendar {
+  background: var(--form-bg);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 50px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(5, 217, 232, 0.2);
+  min-height: 600px;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.fc .fc-toolbar-title {
+  color: var(--neon-cyan);
+  font-size: 1.5rem;
+}
+
+.fc .fc-button-primary {
+  background-color: var(--card-bg);
+  border-color: rgba(5, 217, 232, 0.3);
+  color: var(--text-primary);
+}
+
+.fc .fc-button-primary:hover {
+  background-color: rgba(5, 217, 232, 0.2);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: rgba(5, 217, 232, 0.3);
+  border-color: var(--neon-cyan);
+  color: var(--text-primary);
+}
+
+.fc-daygrid-day-number {
+  color: var(--text-secondary);
+}
+
+.fc-col-header-cell-cushion {
+  color: var(--neon-cyan);
+  font-weight: 600;
+}
+
+.fc-daygrid-day.fc-day-today {
+  background-color: rgba(5, 217, 232, 0.1);
+}
+
+/* Make sure events stay within their date cells */
+.fc-event {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 4px;
+  border: none !important;
+  padding: 2px 5px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  box-sizing: border-box;
+}
+
+/* Ensure calendar cells have proper sizing and overflow handling */
+.fc-daygrid-day-frame {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Constrain events within the day cell */
+.fc-daygrid-day-events {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Add z-index to prevent events from overlapping into next cell */
+.fc-day-grid-event {
+  position: relative;
+  z-index: 1;
+  margin: 1px 2px 0;
+}
+
+/* Improve event display for better containment */
+.fc-event-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Optional: Add a tooltip on hover to see full event title */
+.fc-event:hover {
+  overflow: visible;
+  z-index: 10;
+}
+
+/* Fix for events that start late in the day */
+.fc-timegrid-event-harness {
+  max-width: 100%;
+}
+
+.task-tooltip {
+  display: none;
+  position: absolute;
+  background: var(--card-bg);
+  border: 1px solid var(--neon-cyan);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  z-index: 1000;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 200px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Task List Styles */
+.task-list-container {
+  background: var(--form-bg);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  margin-bottom: 30px;
+  border: 1px solid rgba(5, 217, 232, 0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.task-list-header {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 1fr;
+  padding: 15px;
+  background-color: rgba(5, 217, 232, 0.1);
+  font-weight: 600;
+  border-bottom: 1px solid rgba(5, 217, 232, 0.2);
+  color: var(--neon-cyan);
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+}
+
+.task-item {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 1fr;
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s ease;
+  align-items: center;
+}
+
+.task-item:hover {
+  background-color: rgba(5, 217, 232, 0.05);
+}
+
+.task-title {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.task-details {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-size: 0.80rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.badge-school {
+  background-color: rgba(1, 200, 238, 0.2);
+  color: var(--neon-blue);
+  border: 1px solid rgba(1, 200, 238, 0.3);
+}
+
+.badge-personal {
+  background-color: rgba(189, 0, 255, 0.2);
+  color: var(--neon-purple);
+  border: 1px solid rgba(189, 0, 255, 0.3);
+}
+
+.badge-subject {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.badge-high {
+  background-color: rgba(255, 42, 109, 0.2);
+  color: var(--neon-pink);
+  border: 1px solid rgba(255, 42, 109, 0.3);
+}
+
+.badge-medium {
+  background-color: rgba(255, 156, 0, 0.2);
+  color: #ff9c00;
+  border: 1px solid rgba(255, 156, 0, 0.3);
+}
+
+.badge-low {
+  background-color: rgba(46, 213, 115, 0.2);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.badge-done {
+  background-color: rgba(46, 213, 115, 0.2);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+  padding: 5px 10px;
+}
+
+.task-date {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.task-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.complete-btn {
+  background-color: rgba(59, 130, 246, 0.8);
+  color: white;
+  border: 1px solid #3b82f6;
+}
+
+.complete-btn:hover {
+  background-color: rgba(37, 99, 235, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+}
+
+.edit-btn {
+  background-color: rgba(168, 85, 247, 0.8);
+  color: white;
+  border: 1px solid #a855f7;
+}
+
+.edit-btn:hover {
+  background-color: rgba(147, 51, 234, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(168, 85, 247, 0.4);
+}
+
+.delete-btn {
+  background-color: rgba(220, 38, 38, 0.8);
+  color: white;
+  border: 1px solid #dc2626;
+}
+
+.delete-btn:hover {
+  background-color: rgba(185, 28, 28, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
+}
+
+/* Animation when completing a task */
+.complete-btn.completing {
+  background-color: rgba(22, 163, 74, 0.9);
+  animation: completeTask 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.priority-high {
+  border-left: 4px solid var(--neon-pink);
+}
+
+.priority-medium {
+  border-left: 4px solid #ff9c00;
+}
+
+.priority-low {
+  border-left: 4px solid #2ed573;
+}
+
+/* Filter Form */
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: rgba(5, 217, 232, 0.1);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(5, 217, 232, 0.3);
+  padding: 10px 15px;
+  border-radius: var(--border-radius);
+  margin: 0 auto 15px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.filter-toggle:hover {
+  background-color: rgba(5, 217, 232, 0.2);
+}
+
+.filter-toggle.collapsed::after {
+  content: "\f078";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-left: 5px;
+  font-size: 0.8rem;
+}
+
+.filter-toggle:not(.collapsed)::after {
+  content: "\f077";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-left: 5px;
+  font-size: 0.8rem;
+}
+
+.filter-form {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+  background-color: #242424;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ea00ff;
+  align-items: center;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* User Info Styles */
+.user-info-display {
+  background: rgba(15, 23, 42, 0.6);
+  padding: 20px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  border: 1px solid rgba(5, 217, 232, 0.2);
+}
+
+.user-data-row {
+  display: flex;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.user-data-row label {
+  width: 120px;
+  color: var(--neon-cyan);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-data-row span {
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* Animation Classes */
+.completing {
+  animation: complete-task 0.6s forwards;
+}
+
+@keyframes complete-task {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+.display-visible {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .button-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .task-list-header,
+  .task-item {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .task-header-details,
+  .task-details {
+    display: none;
+  }
+  
+  .user-data-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .user-data-row label {
+    margin-bottom: 5px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-container img {
+    height: 60px;
+  }
+  
+  .task-list-header,
+  .task-item {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .task-actions {
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .task-header-date,
+  .task-date {
+    display: none;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .filter-form {
+    flex-direction: column;
+  }
+  
+  .filter-buttons {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(5, 217, 232, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(5, 217, 232, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(5, 217, 232, 0.5); }
+}
+
+/* Apply animations */
+.calendar, .task-list-container, .user-info-display, form {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+.animate__fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Neon Lines Background Animation */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 42, 109, 0.03),
+    rgba(189, 0, 255, 0.03),
+    rgba(5, 217, 232, 0.03)
+  );
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
+  pointer-events: none;
+  z-index: -2;
+}
+
+/* Quick enhancement for task item visual */
+.no-tasks-message {
+  text-align: center;
+  padding: 30px;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.subject-field {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--primary-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(5, 217, 232, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(5, 217, 232, 0.5);
+}

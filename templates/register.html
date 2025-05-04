@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyMate - Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Add FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div class="logo-container">
+    <img src="{{ url_for('static', filename='logo1.png') }}" alt="Logo 1">
+    <img src="{{ url_for('static', filename='logo2.png') }}" alt="Logo 2">
+  </div>
+
+  <div class="register_container">
+    <h1 class="welcome-title">Welcome To StudyMate</h1>
+    <form action="/register" method="POST" id="registerForm">
+      <h2>Register</h2>
+      <div class="input-group">
+        <i class="fas fa-user icon"></i>
+        <input type="text" name="name" placeholder="Enter Name" required autocomplete="off">
+      </div>
+      <div class="input-group">
+        <i class="fas fa-id-card icon"></i>
+        <input type="text" name="student_id" placeholder="Enter Student ID" required autocomplete="off">
+      </div>
+      <div class="input-group">
+        <i class="fas fa-envelope icon"></i>
+        <input type="email" name="gmail" placeholder="Enter Gmail" required autocomplete="off">
+      </div>
+      <div class="input-group">
+        <i class="fas fa-birthday-cake icon"></i>
+        <input type="number" name="age" placeholder="Enter Age" required>
+      </div>
+      <button type="submit">Register <i class="fas fa-user-plus"></i></button>
+    </form>
+    <p>Already registered? <a href="/login">Login here</a></p>
+  </div>
+
+  <div class="footer">
+    <span>JOHN CHRIS BERNAL SANCHEZ</span>
+  </div>
+
+  <script>
+    // Add animation when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Form animation
+      const form = document.getElementById('registerForm');
+      form.classList.add('animate-in');
+      
+      // Add event listeners for input focus effects
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach((input, index) => {
+        // Add staggered animation delay to each input
+        input.style.animationDelay = `${0.1 + (index * 0.1)}s`;
+        
+        input.addEventListener('focus', function() {
+          this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+          if (!this.value) {
+            this.parentElement.classList.remove('focused');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

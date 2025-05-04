@@ -1,0 +1,436 @@
+body {
+  background-image: url("background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  font-family: 'Segoe UI', sans-serif;
+  color: #02fbff;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Updated Logo Container */
+.logo-container {
+  position: fixed;
+  top: 20px; 
+  left: 20px;
+  display: flex;
+  gap: 30px;
+  z-index: 10;
+  animation: fadeInDown 1s ease-out;
+}
+
+.logo-container img {
+  width: 125px; 
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+/* New logo animations */
+.logo-container img:nth-child(1) {
+  animation: logoPulse 2s infinite alternate;
+  animation-delay: 2s;
+}
+
+.logo-container img:nth-child(2) {
+  animation: logoPulse 2s infinite alternate;
+  animation-delay: 4s; /* Second logo starts pulsing 1 second after the first */
+}
+
+@keyframes logoPulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px rgba(234, 0, 255, 0.3));
+  }
+  100% {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 15px rgba(234, 0, 255, 0.8));
+  }
+}
+
+/* Updated Footer styles with specific animation */
+.footer {
+  position: fixed;
+  bottom: 15px;
+  left: 20px;
+  padding: 5px 15px;
+  color: #00fdfd;
+  font-size: 18px;
+  font-weight: 600;
+  z-index: 5;
+  animation: glow 2s infinite alternate;
+  text-align: left;
+  background: none;
+}
+
+.footer span {
+  position: relative;
+  display: inline-block;
+}
+
+.footer span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #ff00c8, #00fdfd);
+  transform-origin: center;
+  animation: footerLinePulse 2s infinite alternate;
+}
+
+/* New animation specific to footer line */
+@keyframes footerLinePulse {
+  from {
+    width: 0;
+    opacity: 0.7;
+  }
+  to {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+/* Make sure footer is responsive */
+@media (max-width: 768px) {
+  .footer {
+    font-size: 16px;
+    bottom: 10px;
+    left: 15px;
+  }
+}
+
+
+.login_container {
+  max-width: 430px;
+  max-height: 460px;
+  margin: auto;
+  padding: 4rem;
+  background-color: rgba(30, 30, 47, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.7);
+  animation: fadeIn 1s ease-out;
+  transform-origin: center;
+}
+.login_container.animate-in {
+  transform: translateY(0);
+  opacity: 2;
+  animation: glowPulse 2s infinite alternate;
+}
+
+.register_container {
+  max-width: 450px;
+  max-height: 600px;
+  margin: auto;
+  padding: 3rem;
+  background-color: rgba(30, 30, 47, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.7);
+  animation: fadeIn 1s ease-out;
+  transform-origin: center;
+}
+
+.register_container.animate-in {
+  transform: translateY(0);
+  opacity: 2;
+  animation: glowPulse 2s infinite alternate;
+}
+
+/* Updated Welcome Title with specific animation */
+h1.welcome-title {
+  color: #00fdfd;
+  text-align: center;
+  font-size: 38px;
+  margin-bottom: 25px;
+  position: relative;
+  animation: glow 2s infinite alternate;
+}
+
+h1.welcome-title::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 80%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff00c8, #00fdfd);
+  transform: translateX(-50%);
+  transform-origin: center;
+  animation: welcomeLinePulse 2s infinite alternate;
+}
+
+/* New animation specific to welcome title line */
+@keyframes welcomeLinePulse {
+  from {
+    transform: translateX(-50%) scaleX(0.7);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 1;
+  }
+}
+
+h2 {
+  color: #ff00c8;
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 25px;
+  animation: slideInUp 0.8s ease-out;
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #00fdfd, transparent);
+}
+
+a {
+  color: #ff0000;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: #ff00c8;
+  text-shadow: 0 0 8px rgba(255, 0, 200, 0.7);
+}
+
+
+form {
+  background-color: rgba(30, 30, 47, 0.6);
+  border-radius: 18px;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.5s ease-out;
+}
+
+/* Class added via JS when page loads */
+form.animate-in {
+  transform: translateY(0);
+  opacity: 2;
+  animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+  from {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(223, 85, 247, 0.8), 0 0 50px rgba(0, 234, 255, 0.3);
+  }
+}
+
+/* Improve input fields with animation */
+/* Input group styling for icon + input combination */
+.input-group {
+  position: relative;
+  width: 90%;
+  margin-bottom: 1.5rem;
+  animation: slideInRight 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.input-group .icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ea00ff;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.input-group.focused .icon {
+  color: #00eaff;
+  transform: translateY(-50%) scale(1.2);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select{
+  width: 100%;
+  padding: 1rem 3rem 1rem 45px; /* Left padding for icon */
+  border: 2px solid #ea00ff;
+  border-radius: 18px;
+  background-color: rgba(44, 44, 58, 0.7);
+  color: #00ffea;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+select:focus {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(234, 0, 255, 0.4);
+  background-color: rgba(44, 44, 58, 0.9);
+}
+
+/* Delay each input group's animation */
+form .input-group:nth-child(3) { animation-delay: 0.1s; }
+form .input-group:nth-child(4) { animation-delay: 0.2s; }
+form .input-group:nth-child(5) { animation-delay: 0.3s; }
+form .input-group:nth-child(6) { animation-delay: 0.4s; }
+
+
+button {
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  background: linear-gradient(90deg, #ea00ff, #00eaff);
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(234, 0, 255, 0.3);
+  animation: pulse 2s infinite;
+}
+
+button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(234, 0, 255, 0.5);
+  background: linear-gradient(90deg, #00eaff, #ea00ff);
+}
+
+p {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 15px;
+  animation: fadeIn 1s ease-out;
+  animation-delay: 1s;
+  animation-fill-mode: both;
+}
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(234, 0, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 6px 16px rgba(234, 0, 255, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(234, 0, 255, 0.3);
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px rgba(0, 253, 253, 0.5);
+  }
+  to {
+    text-shadow: 0 0 20px rgba(0, 253, 253, 0.8), 0 0 30px rgba(0, 253, 253, 0.6);
+  }
+}
+
+@keyframes underlineExpand {
+  from {
+    width: 0;
+  }
+  to {
+    width: 80%;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .login_container,.register_container {
+    width: 90%;
+    padding: 1.5rem;
+  }
+  
+  .logo-container {
+    top: 10px;
+    left: 10px;
+  }
+  
+  .logo-container img {
+    width: 100px;
+  }
+  
+  h1 {
+    font-size: 32px;
+  }
+  
+  h2 {
+    font-size: 24px;
+  }
+}

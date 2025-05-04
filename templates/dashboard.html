@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyMate</title>
+  <!-- Include all required FullCalendar packages -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Animate.css for animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+
+  <div class="logo-container animate__animated animate__bounceIn">
+    <img src="{{ url_for('static', filename='logo1.png') }}" alt="Logo 1">
+    <img src="{{ url_for('static', filename='logo2.png') }}" alt="Logo 2">
+  </div>
+
+  <div class="container">
+    <h1 class="welcome-title">Welcome To StudyMate</h1>
+
+    <div class="button-row animate__animated animate__fadeInUp">
+      <button id="show-form-btn"><i class="fas fa-plus-circle"></i> Add Task</button>
+      <button id="show-tasks-btn"><i class="fas fa-tasks"></i> Show Tasks</button>
+      <button id="show-user-info-btn"><i class="fas fa-user"></i> User Info</button>
+      <button id="logout-btn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+
+    <!-- Task Form -->
+    <form id="task-form" action="/add_task" method="POST" style="display: none;">
+      <h2><i class="fas fa-clipboard-list"></i> Add Your Task</h2>
+      
+      <div class="form-group">
+        <input type="text" name="title" placeholder="Enter Task Title" required autocomplete="off">
+        <i class="fas fa-heading input-icon"></i>
+      </div>
+
+      <div class="form-group">
+        <select name="type" id="task-type" required>
+          <option value="">Select Task Type</option>
+          <option value="school">School</option>
+          <option value="personal">Personal</option>
+        </select>
+        <i class="fas fa-tag input-icon"></i>
+      </div>
+
+      <!-- Subject field with ID for easier targeting -->
+      <div id="subject-field" class="subject-field">
+        <div class="form-group">
+          <input type="text" name="subject" placeholder="Enter Subject (if school)" autocomplete="off">
+          <i class="fas fa-book input-icon"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input type="date" name="date" required autocomplete="off">
+        <i class="fas fa-calendar input-icon"></i>
+      </div>
+      
+      <div class="form-group">
+        <input type="time" name="time" placeholder="Enter Time" required autocomplete="off">
+        <i class="fas fa-clock input-icon"></i>
+      </div>
+
+      <div class="form-group">
+        <select name="priority" required>
+          <option value="">Select Priority</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <i class="fas fa-flag input-icon"></i>
+      </div>
+
+      <div class="button-row">
+        <button type="submit"><i class="fas fa-save"></i> Add Task</button>
+        <button type="button" id="cancel-form-btn"><i class="fas fa-times"></i> Cancel</button>
+      </div>
+    </form>
+
+    <!-- Edit Task Form (Initially Hidden) -->
+    <form id="edit-task-form" action="/edit_task" method="POST" style="display: none;">
+      <h2><i class="fas fa-edit"></i> Edit Task</h2>
+      <input type="hidden" name="task_id" id="edit-task-id">
+      
+      <div class="form-group">
+        <input type="text" name="title" id="edit-title" placeholder="Enter Task Title" required autocomplete="off">
+        <i class="fas fa-heading input-icon"></i>
+      </div>
+
+      <div class="form-group">
+        <select name="type" id="edit-type" required>
+          <option value="">Select Task Type</option>
+          <option value="school">School</option>
+          <option value="personal">Personal</option>
+        </select>
+        <i class="fas fa-tag input-icon"></i>
+      </div>
+
+      <!-- Subject field with ID for easier targeting -->
+      <div id="edit-subject-field" class="subject-field">
+        <div class="form-group">
+          <input type="text" name="subject" id="edit-subject" placeholder="Enter Subject (if school)" autocomplete="off">
+          <i class="fas fa-book input-icon"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input type="date" name="date" id="edit-date" required autocomplete="off">
+        <i class="fas fa-calendar input-icon"></i>
+      </div>
+      
+      <div class="form-group">
+        <input type="time" name="time" id="edit-time" required autocomplete="off">
+        <i class="fas fa-clock input-icon"></i>
+      </div>
+
+      <div class="form-group">
+        <select name="priority" id="edit-priority" required>
+          <option value="">Select Priority</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <i class="fas fa-flag input-icon"></i>
+      </div>
+
+      <div class="button-row">
+        <button type="submit"><i class="fas fa-check"></i> Update Task</button>
+        <button type="button" id="cancel-edit-btn"><i class="fas fa-times"></i> Cancel</button>
+      </div>
+    </form>
+
+    <!-- User Info Form (Initially Hidden) -->
+    <div id="user-info-container" style="display: none;">
+      <h2><i class="fas fa-user-circle"></i> User Information</h2>
+      <div class="user-info-display">
+        <div class="user-data-row">
+          <label><i class="fas fa-user"></i> Name:</label>
+          <span id="display-name">Loading...</span>
+        </div>
+        <div class="user-data-row">
+          <label><i class="fas fa-id-card"></i> Student ID:</label>
+          <span id="display-student-id">Loading...</span>
+        </div>
+        <div class="user-data-row">
+          <label><i class="fas fa-envelope"></i> Email:</label>
+          <span id="display-email">Loading...</span>
+        </div>
+        <div class="user-data-row">
+          <label><i class="fas fa-birthday-cake"></i> Age:</label>
+          <span id="display-age">Loading...</span>
+        </div>
+      </div>
+      <button id="edit-user-info-btn" class="btn-primary"><i class="fas fa-edit"></i> Edit Information</button>
+      
+      <!-- User Info Edit Form (Initially Hidden) -->
+      <form id="user-edit-form" action="/update_user" method="POST" style="display: none;">
+        <div class="form-group">
+          <label for="edit-user-name">Name:</label>
+          <input type="text" id="edit-user-name" name="name" required>
+          <i class="fas fa-user input-icon"></i>
+        </div>
+        <div class="form-group">
+          <label for="edit-user-email">Email:</label>
+          <input type="email" id="edit-user-email" name="gmail" required>
+          <i class="fas fa-envelope input-icon"></i>
+        </div>
+        <div class="form-group">
+          <label for="edit-user-age">Age:</label>
+          <input type="number" id="edit-user-age" name="age" required>
+          <i class="fas fa-birthday-cake input-icon"></i>
+        </div>
+        <div class="button-row">
+          <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+          <button type="button" id="cancel-user-edit-btn" class="btn-secondary"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Calendar - Now shown by default -->
+    <div id="calendar" class="calendar"></div>
+
+    <!-- Task List and Filter Form -->
+    <div id="task-container" style="display: none;">
+      <h2><i class="fas fa-list-check"></i> Your Tasks</h2>
+      
+      <!-- Filter Form Toggle Button -->
+      <button type="button" id="filter-toggle" class="filter-toggle collapsed">
+        <i class="fas fa-filter"></i> Filter Options
+      </button>
+      
+      <!-- Enhanced Filter Form -->
+      <form id="filter-form" class="filter-form" style="display: none;">
+        <div class="form-group" style="flex: 2; margin-bottom: 0;">
+          <input type="text" id="subject-filter" name="subject_filter" placeholder="Subject" autocomplete="off">
+          <i class="fas fa-book input-icon"></i>
+        </div>
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+          <select id="type-filter" name="type_filter">
+            <option value="">All Types</option>
+            <option value="school">School</option>
+            <option value="personal">Personal</option>
+          </select>
+          <i class="fas fa-tag input-icon"></i>
+        </div>
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+          <select id="priority-filter" name="priority_filter">
+            <option value="">All Priorities</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+          <i class="fas fa-flag input-icon"></i>
+        </div>
+        <div class="filter-buttons">
+          <button type="button" id="apply-filter-btn"><i class="fas fa-check"></i> Apply</button>
+          <button type="button" id="clear-filter-btn"><i class="fas fa-broom"></i> Clear</button>
+        </div>
+      </form>
+      
+      <!-- Enhanced Task List -->
+      {% if tasks %}
+        <div class="task-list-container animate__animated animate__fadeIn">
+          <div class="task-list-header">
+            <span class="task-header-title">Title</span>
+            <span class="task-header-details">Details</span>
+            <span class="task-header-date">Due Date</span>
+            <span class="task-header-actions">Actions</span>
+          </div>
+          <ul class="task-list">
+            {% for task in tasks %}
+              <li class="task-item priority-{{ task.priority }} animate__animated animate__fadeIn" data-subject="{{ task.subject|lower }}" data-type="{{ task.type }}" data-priority="{{ task.priority }}">
+                <div class="task-title">{{ task.title }}</div>
+                <div class="task-details">
+                  <span class="badge badge-{{ task.type }}">{{ task.type }}</span>
+                  {% if task.subject %}<span class="badge badge-subject">{{ task.subject }}</span>{% endif %}
+                  <span class="badge badge-priority badge-{{ task.priority }}">{{ task.priority }}</span>
+                </div>
+                <div class="task-date">{{ task.due }} {{ task.time }}</div>
+                <div class="task-actions">
+                  {% if task.done %}
+                    <span class="badge-done"><i class="fas fa-check"></i> Completed</span>
+                  {% else %}
+                    <a href="/complete_task/{{ task.id }}" class="action-btn complete-btn"><i class="fas fa-check"></i> Complete</a>
+                    <button type="button" class="action-btn edit-btn" data-task-id="{{ task.id }}" 
+                      data-title="{{ task.title }}" data-type="{{ task.type }}" data-subject="{{ task.subject }}"
+                      data-date="{{ task.due }}" data-time="{{ task.time }}" data-priority="{{ task.priority }}">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                  {% endif %}
+                  <a href="/delete_task/{{ task.id }}" class="action-btn delete-btn"><i class="fas fa-trash"></i> Delete</a>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div id="no-tasks-message" style="display: none;">
+          <p><i class="fas fa-info-circle"></i> No tasks match your filter criteria.</p>
+        </div>
+      {% else %}
+        <p class="animate__animated animate__fadeIn"><i class="fas fa-info-circle"></i> No tasks yet. Add some tasks to get started!</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>JOHN CHRIS BERNAL SANCHEZ</span>
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("DOM fully loaded");
+  
+  // Global calendar variable
+  let calendar = null;
+  
+  // Get all UI elements with proper error checking
+  const showFormBtn = document.getElementById("show-form-btn");
+  const showTasksBtn = document.getElementById("show-tasks-btn");
+  const showUserInfoBtn = document.getElementById("show-user-info-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+  const taskForm = document.getElementById("task-form");
+  const editTaskForm = document.getElementById("edit-task-form");
+  const taskContainer = document.getElementById("task-container");
+  const userInfoContainer = document.getElementById("user-info-container");
+  const calendarEl = document.getElementById("calendar");
+  
+  // Debug element finding
+  console.log("Found UI elements:", {
+    showFormBtn: !!showFormBtn,
+    showTasksBtn: !!showTasksBtn,
+    showUserInfoBtn: !!showUserInfoBtn,
+    taskForm: !!taskForm,
+    editTaskForm: !!editTaskForm,
+    taskContainer: !!taskContainer,
+    calendarEl: !!calendarEl
+  });
+  
+  // New function to make sure element is visible with CSS class
+  function makeVisible(element) {
+    if (!element) return;
+    
+    // First ensure display is block
+    element.style.display = "block";
+    
+    // Then add a CSS class that forces visibility
+    element.classList.add("display-visible");
+    
+    // Force browser to repaint
+    void element.offsetHeight;
+    
+    console.log(`Made visible: ${element.id || 'unnamed element'}`);
+  }
+  
+  // Improved hide function using both style and classes
+  function hideElement(element) {
+    if (!element) return;
+    
+    // Remove visibility class
+    element.classList.remove("display-visible");
+    
+    // Set display to none
+    element.style.display = "none";
+    
+    // Force browser to repaint
+    void element.offsetHeight;
+    
+    console.log(`Hidden: ${element.id || 'unnamed element'}`);
+  }
+  
+  // Improved function to hide all sections
+  function hideAllSections() {
+    console.log("Hiding all sections");
+    
+    // Get all section elements
+    const sections = [taskForm, editTaskForm, taskContainer, userInfoContainer];
+    
+    // Hide each section if it exists
+    sections.forEach(section => {
+      if (section) {
+        hideElement(section);
+      }
+    });
+    
+    // Handle calendar separately
+    if (calendarEl) {
+      hideElement(calendarEl);
+    }
+    
+    console.log("All sections hidden");
+  }
+  
+  // Enhanced calendar initialization function with view-specific settings
+function showCalendar() {
+  // Make sure calendar container is visible
+  if (calendarEl) {
+    console.log("Showing calendar");
+    makeVisible(calendarEl);
+    
+    // Set explicit height for calendar container
+    calendarEl.style.height = "600px";
+    
+    // Force layout recalculation
+    void calendarEl.offsetHeight;
+    
+    // Initialize calendar with a delay to ensure container is visible
+    setTimeout(() => {
+      // Check if calendar already exists
+      if (calendar) {
+        calendar.destroy();
+      }
+      
+      // Create a new calendar instance with improved configuration
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        height: 'auto',
+        aspectRatio: 1.35,
+        themeSystem: 'standard',
+        editable: false,
+        selectable: true,
+        
+        // Enhanced events loading with error handling and proper formatting for all views
+        events: function(info, successCallback, failureCallback) {
+          fetch('/get_tasks')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Failed to load tasks');
+              }
+              return response.json();
+            })
+            .then(data => {
+              // Process events to ensure they work in all views
+              const formattedEvents = data.map(event => {
+                // Extract time from the start date string if available
+                let startDate = event.start;
+                let endDate = event.start; // Default end to same as start
+                
+                // Create proper datetime objects for week/day views
+                if (startDate) {
+                  // Check if we have a date and time
+                  const hasTime = event.extendedProps && event.extendedProps.time;
+                  
+                  if (hasTime) {
+                    // Convert time string (e.g. "2:30 PM") to 24-hour format for JavaScript Date
+                    let hours = 0;
+                    let minutes = 0;
+                    
+                    try {
+                      const timeParts = event.extendedProps.time.match(/(\d+):(\d+)\s*([AP]M)/i);
+                      if (timeParts) {
+                        hours = parseInt(timeParts[1]);
+                        minutes = parseInt(timeParts[2]);
+                        const ampm = timeParts[3].toUpperCase();
+                        
+                        if (ampm === 'PM' && hours < 12) hours += 12;
+                        if (ampm === 'AM' && hours === 12) hours = 0;
+                      }
+                    } catch (e) {
+                      console.error("Error parsing time:", e);
+                    }
+                    
+                    // Create a proper date object
+                    const dateObj = new Date(startDate);
+                    dateObj.setHours(hours, minutes, 0);
+                    startDate = dateObj.toISOString();
+                    
+                    // Set end time 1 hour later for better visibility in week/day views
+                    const endDateObj = new Date(dateObj);
+                    endDateObj.setHours(hours + 1, minutes, 0);
+                    endDate = endDateObj.toISOString();
+                  }
+                }
+                
+                // Return properly formatted event object that works in all views
+                return {
+                  id: event.id,
+                  title: event.title,
+                  start: startDate,
+                  end: endDate, // Add end time for week/day views
+                  allDay: !(event.extendedProps && event.extendedProps.time), // Set allDay based on whether we have a time
+                  backgroundColor: getEventColor(event.extendedProps?.priority),
+                  borderColor: getEventColor(event.extendedProps?.priority),
+                  textColor: '#ffffff',
+                  extendedProps: {
+                    priority: event.extendedProps?.priority || 'low',
+                    type: event.extendedProps?.type || '',
+                    subject: event.extendedProps?.subject || '',
+                    time: event.extendedProps?.time || ''
+                  }
+                };
+              });
+              
+              console.log("Loaded and formatted events for calendar:", formattedEvents);
+              successCallback(formattedEvents);
+            })
+            .catch(error => {
+              console.error("Error loading calendar events:", error);
+              failureCallback(error);
+            });
+        },
+        
+        // View-specific options
+        views: {
+          timeGridWeek: {
+            slotMinTime: '06:00:00',
+            slotMaxTime: '22:00:00',
+            nowIndicator: true,
+            slotEventOverlap: false, // Prevent event overlap for better visibility
+            slotDuration: '00:30:00' // 30-minute slots for better granularity
+          },
+          timeGridDay: {
+            slotMinTime: '06:00:00',
+            slotMaxTime: '22:00:00',
+            nowIndicator: true,
+            slotEventOverlap: false,
+            slotDuration: '00:30:00'
+          }
+        },
+        
+        eventDidMount: function(info) {
+          // Event mounting logic - customize based on view type
+          const viewType = info.view.type;
+          console.log("Event mounted in view:", viewType, "Event:", info.event.title);
+          
+          // Different tooltip handling based on view
+          const tooltip = document.createElement('div');
+          tooltip.classList.add('task-tooltip');
+          
+          let tooltipContent = `
+            <strong>${info.event.title}</strong><br>
+            Priority: ${info.event.extendedProps.priority || 'N/A'}<br>
+          `;
+          
+          // Add more details for month view
+          if (viewType === 'dayGridMonth') {
+            tooltipContent += `Due: ${info.event.extendedProps.time ? info.event.start.toLocaleDateString() + ' ' + info.event.extendedProps.time : info.event.start.toLocaleDateString()}`;
+          } else {
+            // Simpler tooltip for week/day views since they already show the time
+            tooltipContent += `Type: ${info.event.extendedProps.type || 'N/A'}`;
+            if (info.event.extendedProps.subject) {
+              tooltipContent += `<br>Subject: ${info.event.extendedProps.subject}`;
+            }
+          }
+          
+          tooltip.innerHTML = tooltipContent;
+          info.el.appendChild(tooltip);
+          
+          // Show/hide tooltip on hover
+          info.el.addEventListener('mouseover', function() {
+            tooltip.style.display = 'block';
+          });
+          info.el.addEventListener('mouseout', function() {
+            tooltip.style.display = 'none';
+          });
+          
+          // Apply custom styling for week/day views to ensure visibility
+          if (viewType.includes('timeGrid')) {
+            info.el.style.minHeight = '25px';
+            info.el.style.fontSize = '0.85em';
+            info.el.style.zIndex = '5';
+            info.el.style.overflow = 'hidden';
+            info.el.style.padding = '2px 4px';
+          }
+          
+          // Apply color based on priority
+          info.el.style.backgroundColor = getEventColor(info.event.extendedProps.priority);
+        },
+        
+        eventClick: function(info) {
+          // Show modal or alert with task details
+          let alertText = `Task: ${info.event.title}
+Priority: ${info.event.extendedProps.priority || 'N/A'}
+Type: ${info.event.extendedProps.type || 'N/A'}`;
+
+          if (info.event.extendedProps.subject) {
+            alertText += `\nSubject: ${info.event.extendedProps.subject}`;
+          }
+          
+          alertText += `\nDue: ${info.event.start ? 
+            info.event.start.toLocaleDateString() + 
+            (info.event.extendedProps.time ? ' ' + info.event.extendedProps.time : '') : 'N/A'}`;
+          
+          alert(alertText);
+        },
+        
+        // Handle view changes to ensure events are rendered correctly
+        viewDidMount: function(info) {
+          console.log("View changed to:", info.view.type);
+          
+          // Special handling for week/day views
+          if (info.view.type.includes('timeGrid')) {
+            console.log("Preparing timeGrid view");
+            // Force event re-rendering for timeGrid views
+            setTimeout(() => {
+              if (calendar) {
+                // Update any view-specific settings
+                calendar.updateSize();
+              }
+            }, 100);
+          }
+        }
+      });
+      
+      console.log("Rendering calendar...");
+      calendar.render();
+      console.log("Calendar rendered successfully");
+      
+      // Force calendar to update size after rendering
+      setTimeout(() => {
+        if (calendar) {
+          calendar.updateSize();
+          console.log("Calendar size updated");
+        }
+      }, 300);
+    }, 300);
+  } else {
+    console.error("Calendar element not found!");
+  }
+}
+
+// Enhanced CSS for better tooltip and event visibility
+const calendarStyles = document.createElement('style');
+calendarStyles.textContent = `
+  .task-tooltip {
+    position: absolute;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: none;
+    top: 100%;
+    left: 0;
+    min-width: 150px;
+    pointer-events: none;
+  }
+  
+  /* Ensure events in week/day view are visible */
+  .fc-timegrid-event-harness {
+    z-index: 3 !important;
+  }
+  
+  .fc-timegrid-event {
+    min-height: 25px !important;
+    padding: 3px !important;
+    font-size: 0.85em !important;
+  }
+  
+  /* Make time more visible in week/day views */
+  .fc-event-time {
+    font-weight: bold !important;
+    margin-right: 3px !important;
+  }
+  
+  /* Make sure events in month view have enough height */
+  .fc-daygrid-event {
+    min-height: 22px;
+    margin-bottom: 2px;
+    padding: 3px 5px;
+  }
+  
+  /* Fix for specific FullCalendar appearance issues */
+  .fc-v-event {
+    border: none !important;
+  }
+  
+  /* Ensure columns are wide enough in week view */
+  .fc-timegrid-col {
+    min-width: 100px !important;
+  }
+`;
+document.head.appendChild(calendarStyles);
+
+// Helper function to get color based on priority
+function getEventColor(priority) {
+  switch(priority) {
+    case "high":
+      return '#dc2626'; // red
+    case "medium":
+      return '#f59e0b'; // yellow
+    default:
+      return '#10b981'; // green
+  }
+}
+  
+  // Improved: Show User Info with better visibility enforcement
+  if (showUserInfoBtn) {
+    showUserInfoBtn.addEventListener("click", function() {
+      console.log("Show user info button clicked");
+      
+      hideAllSections();
+      
+      if (userInfoContainer) {
+        console.log("Showing user info container");
+        makeVisible(userInfoContainer);
+        
+        // Fetch user info
+        fetch('/get_user_info')
+          .then(response => response.json())
+          .then(data => {
+            document.getElementById("display-name").textContent = data.name;
+            document.getElementById("display-student-id").textContent = data.student_id;
+            document.getElementById("display-email").textContent = data.gmail;
+            document.getElementById("display-age").textContent = data.age;
+            
+            // Populate edit form
+            document.getElementById("edit-user-name").value = data.name;
+            document.getElementById("edit-user-email").value = data.gmail;
+            document.getElementById("edit-user-age").value = data.age;
+          })
+          .catch(error => {
+            console.error('Error fetching user data:', error);
+            alert('Failed to load user information. Please try again.');
+          });
+      } else {
+        console.error("User info container element not found!");
+      }
+    });
+  }
+  
+  // Show Calendar button
+  const showCalendarBtn = document.getElementById("show-calendar-btn") || (() => {
+    const buttonRow = document.querySelector(".button-row");
+    if (buttonRow) {
+      const calendarBtn = document.createElement("button");
+      calendarBtn.id = "show-calendar-btn";
+      calendarBtn.innerHTML = '<i class="fas fa-calendar"></i> Show Calendar';
+      
+      // Insert before logout button if it exists
+      if (logoutBtn) {
+        buttonRow.insertBefore(calendarBtn, logoutBtn);
+      } else {
+        buttonRow.appendChild(calendarBtn);
+      }
+      
+      return calendarBtn;
+    }
+    return null;
+  })();
+  
+  if (showCalendarBtn) {
+    showCalendarBtn.addEventListener("click", function() {
+      console.log("Show calendar button clicked");
+      hideAllSections();
+      showCalendar();
+    });
+  }
+  
+  // User info elements with improved visibility handling
+  const editUserInfoBtn = document.getElementById("edit-user-info-btn");
+  const userEditForm = document.getElementById("user-edit-form");
+  const cancelUserEditBtn = document.getElementById("cancel-user-edit-btn");
+  
+  // IMPROVED: Edit User Info Button
+  if (editUserInfoBtn) {
+    editUserInfoBtn.addEventListener("click", function() {
+      console.log("Edit user info button clicked");
+      
+      const userInfoDisplay = document.querySelector(".user-info-display");
+      if (userInfoDisplay) {
+        userInfoDisplay.style.display = "none";
+      }
+      
+      if (userEditForm) {
+        // Force visibility with multiple techniques
+        userEditForm.style.display = "block";
+        userEditForm.style.visibility = "visible";
+        userEditForm.style.opacity = "1";
+        userEditForm.style.zIndex = "100";
+        makeVisible(userEditForm);
+        
+        console.log("User edit form CSS after showing:", {
+          display: userEditForm.style.display,
+          visibility: userEditForm.style.visibility,
+          opacity: userEditForm.style.opacity,
+          zIndex: userEditForm.style.zIndex
+        });
+      } else {
+        console.error("User edit form not found!");
+      }
+      
+      if (editUserInfoBtn) {
+        editUserInfoBtn.style.display = "none";
+      }
+    });
+  }
+  
+  // Cancel User Edit Button
+  if (cancelUserEditBtn) {
+    cancelUserEditBtn.addEventListener("click", function() {
+      const userInfoDisplay = document.querySelector(".user-info-display");
+      if (userInfoDisplay) {
+        makeVisible(userInfoDisplay);
+      }
+      
+      if (userEditForm) {
+        hideElement(userEditForm);
+      }
+      
+      if (editUserInfoBtn) {
+        editUserInfoBtn.style.display = "block";
+      }
+    });
+  }
+  
+  // Cancel Button for Add Task
+  const cancelFormBtn = document.getElementById("cancel-form-btn");
+  if (cancelFormBtn) {
+    cancelFormBtn.addEventListener("click", function() {
+      console.log("Cancel form button clicked");
+      hideAllSections();
+      showCalendar();
+    });
+  }
+  
+  // Cancel Button for Edit Task
+  const cancelEditBtn = document.getElementById("cancel-edit-btn");
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener("click", function() {
+      console.log("Cancel edit button clicked");
+      
+      if (editTaskForm) {
+        hideElement(editTaskForm);
+      }
+      
+      if (taskContainer) {
+        makeVisible(taskContainer);
+      }
+    });
+  }
+  
+  // Logout Button
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", function() {
+      console.log("Logout button clicked");
+      window.location.href = "/logout";
+    });
+  }
+
+  // Show Task Form button
+if (showFormBtn) {
+  showFormBtn.addEventListener("click", function() {
+    console.log("Show form button clicked");
+    hideAllSections();
+    if (taskForm) {
+      makeVisible(taskForm);
+    } else {
+      console.error("Task form element not found!");
+    }
+  });
+}
+
+// Show Tasks button
+if (showTasksBtn) {
+  showTasksBtn.addEventListener("click", function() {
+    console.log("Show tasks button clicked");
+    hideAllSections();
+    if (taskContainer) {
+      makeVisible(taskContainer);
+    } else {
+      console.error("Task container element not found!");
+    }
+  });
+}
+  
+  // IMPROVED: Filter Toggle Button with better visibility control
+  const filterToggle = document.getElementById("filter-toggle");
+  const filterForm = document.getElementById("filter-form");
+  
+  if (filterToggle && filterForm) {
+    // Ensure it's initially hidden
+    hideElement(filterForm);
+    
+    filterToggle.addEventListener("click", function() {
+      console.log("Filter toggle clicked. Current display:", filterForm.style.display);
+      
+      if (filterForm.style.display === "none") {
+        filterForm.style.display = "flex";
+        filterForm.style.visibility = "visible";
+        filterForm.style.opacity = "1";
+        filterToggle.classList.remove("collapsed");
+        console.log("Filter form is now visible");
+      } else {
+        hideElement(filterForm);
+        filterToggle.classList.add("collapsed");
+        console.log("Filter form is now hidden");
+      }
+    });
+  }
+  
+  
+
+// IMPROVED: Show/Hide Subject Field for Add Task
+const taskTypeSelect = document.getElementById('task-type');
+const subjectField = document.getElementById('subject-field');
+
+if (taskTypeSelect && subjectField) {
+  console.log("Task type select and subject field found");
+  
+  // Add event listener for changes
+  taskTypeSelect.addEventListener("change", function() {
+    console.log("Task type changed to:", this.value);
+    
+    if (this.value === "school") {
+      // Force visibility with multiple approaches
+      subjectField.style.display = "block";
+      subjectField.style.visibility = "visible";
+      subjectField.style.opacity = "1";
+      // Remove any classes that might hide it
+      subjectField.classList.remove("hidden");
+      
+      // Ensure the input inside is also visible
+      const subjectInput = subjectField.querySelector('input[name="subject"]');
+      if (subjectInput) {
+        subjectInput.style.display = "block";
+        subjectInput.style.visibility = "visible";
+        subjectInput.style.opacity = "1";
+      }
+      
+      console.log("Subject field is now visible:", {
+        display: subjectField.style.display,
+        visibility: subjectField.style.visibility,
+        opacity: subjectField.style.opacity
+      });
+    } else {
+      // Hide the field
+      subjectField.style.display = "none";
+      console.log("Subject field hidden for non-school");
+    }
+  });
+  
+  // IMPORTANT: Trigger the change event on page load to set initial state
+  // This ensures the subject field is visible if "school" is pre-selected
+  const event = new Event('change');
+  taskTypeSelect.dispatchEvent(event);
+}
+
+// IMPROVED: Show/Hide Subject Field for Edit Task Form
+const editTypeSelect = document.getElementById("edit-type");
+const editSubjectField = document.getElementById("edit-subject-field");
+
+if (editTypeSelect && editSubjectField) {
+  console.log("Edit type select and subject field found");
+  
+  // Add event listener for changes
+  editTypeSelect.addEventListener("change", function() {
+    console.log("Edit type changed to:", this.value);
+    
+    if (this.value === "school") {
+      // Force visibility with multiple approaches
+      editSubjectField.style.display = "block";
+      editSubjectField.style.visibility = "visible";
+      editSubjectField.style.opacity = "1";
+      // Remove any classes that might hide it
+      editSubjectField.classList.remove("hidden");
+      
+      // Ensure the input inside is also visible
+      const editSubjectInput = editSubjectField.querySelector('input[name="subject"]');
+      if (editSubjectInput) {
+        editSubjectInput.style.display = "block";
+        editSubjectInput.style.visibility = "visible";
+        editSubjectInput.style.opacity = "1";
+      }
+      
+      console.log("Edit subject field shown for school");
+    } else {
+      editSubjectField.style.display = "none";
+      console.log("Edit subject field hidden for non-school");
+    }
+  });
+  
+  // IMPORTANT: Trigger the change event on page load to set initial state
+  // This ensures the edit subject field is visible if "school" is pre-selected
+  const editEvent = new Event('change');
+  editTypeSelect.dispatchEvent(editEvent);
+}
+  
+  // Setup Edit Task buttons
+  document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      console.log("Edit button clicked for task:", this.getAttribute('data-task-id'));
+      
+      const taskId = this.getAttribute('data-task-id');
+      const title = this.getAttribute('data-title');
+      const type = this.getAttribute('data-type');
+      const subject = this.getAttribute('data-subject');
+      const date = this.getAttribute('data-date');
+      const time = this.getAttribute('data-time');
+      const priority = this.getAttribute('data-priority');
+      
+      // Populate edit form
+      document.getElementById('edit-task-id').value = taskId;
+      document.getElementById('edit-title').value = title;
+      document.getElementById('edit-type').value = type;
+      document.getElementById('edit-subject').value = subject || '';
+      document.getElementById('edit-date').value = date;
+      
+      // Convert time from "1:30 PM" to "13:30" format for input
+      if (time) {
+        try {
+          const timeParts = time.match(/(\d+):(\d+)\s*([AP]M)/i);
+          if (timeParts) {
+            let hours = parseInt(timeParts[1]);
+            const minutes = timeParts[2];
+            const ampm = timeParts[3].toUpperCase();
+            
+            if (ampm === 'PM' && hours < 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+            
+            const timeValue = `${hours.toString().padStart(2, '0')}:${minutes}`;
+            document.getElementById('edit-time').value = timeValue;
+          } else {
+            document.getElementById('edit-time').value = '';
+          }
+        } catch (e) {
+          console.error("Error parsing time:", e);
+          document.getElementById('edit-time').value = '';
+        }
+      }
+      
+      document.getElementById('edit-priority').value = priority;
+      
+      // Show/hide subject field based on type
+      if (type === 'school') {
+        document.getElementById('edit-subject-field').style.display = 'block';
+        document.getElementById('edit-subject-field').style.visibility = 'visible';
+        document.getElementById('edit-subject-field').style.opacity = '1';
+      } else {
+        document.getElementById('edit-subject-field').style.display = 'none';
+      }
+      
+      // Show edit form
+      hideAllSections();
+      if (editTaskForm) {
+        makeVisible(editTaskForm);
+      }
+    });
+  });
+  
+  // Task Filtering (rest of code remains the same)
+  const subjectFilter = document.getElementById("subject-filter");
+  const typeFilter = document.getElementById("type-filter");
+  const priorityFilter = document.getElementById("priority-filter");
+  const applyFilterBtn = document.getElementById("apply-filter-btn");
+  const clearFilterBtn = document.getElementById("clear-filter-btn");
+  const noTasksMessage = document.getElementById("no-tasks-message");
+  
+  function filterTasks() {
+    console.log("Filtering tasks");
+    
+    const subject = subjectFilter?.value.toLowerCase() || '';
+    const type = typeFilter?.value || '';
+    const priority = priorityFilter?.value || '';
+    
+    const taskItems = document.querySelectorAll('.task-item');
+    let visibleCount = 0;
+    
+    taskItems.forEach(item => {
+      const itemSubject = item.getAttribute('data-subject') || '';
+      const itemType = item.getAttribute('data-type');
+      const itemPriority = item.getAttribute('data-priority');
+      
+      const matchesSubject = subject === '' || itemSubject.includes(subject);
+      const matchesType = type === '' || itemType === type;
+      const matchesPriority = priority === '' || itemPriority === priority;
+      
+      if (matchesSubject && matchesType && matchesPriority) {
+        item.style.display = 'grid';
+        visibleCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+    
+    if (noTasksMessage) {
+      if (visibleCount === 0 && (subject !== '' || type !== '' || priority !== '')) {
+        noTasksMessage.style.display = 'block';
+      } else {
+        noTasksMessage.style.display = 'none';
+      }
+    }
+    
+    console.log(`Filter results: ${visibleCount} tasks visible`);
+  }
+  
+  if (applyFilterBtn) {
+    applyFilterBtn.addEventListener('click', filterTasks);
+  }
+  
+  if (clearFilterBtn) {
+    clearFilterBtn.addEventListener('click', function() {
+      console.log("Clearing filters");
+      if (subjectFilter) subjectFilter.value = '';
+      if (typeFilter) typeFilter.value = '';
+      if (priorityFilter) priorityFilter.value = '';
+      filterTasks();
+    });
+  }
+  
+  if (subjectFilter) subjectFilter.addEventListener('input', filterTasks);
+  if (typeFilter) typeFilter.addEventListener('change', filterTasks);
+  if (priorityFilter) priorityFilter.addEventListener('change', filterTasks);
+  
+  // Task completion animation
+  const completeButtons = document.querySelectorAll('.complete-btn');
+  completeButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      console.log("Complete button clicked");
+      e.preventDefault();
+      this.classList.add('completing');
+      const completeUrl = this.getAttribute('href');
+      setTimeout(() => {
+        window.location.href = completeUrl;
+      }, 600);
+    });
+  });
+
+  console.log("Auto-displaying calendar on page load");
+  hideAllSections();
+  showCalendar();
+  
+  // Handle window resize events
+  window.addEventListener('resize', function() {
+    if (calendar && calendarEl && calendarEl.style.display !== 'none') {
+      console.log("Window resized, updating calendar size");
+      calendar.updateSize();
+    }
+  });
+});
+
+</script>
+</body>
+</html>
