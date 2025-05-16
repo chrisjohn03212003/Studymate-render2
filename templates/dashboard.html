@@ -95,8 +95,8 @@
       <div class="form-group">
         <select name="type" id="edit-type" required>
           <option value="">Select Task Type</option>
-          <option value="school">School</option>
-          <option value="personal">Personal</option>
+          <option value="School">School</option>
+          <option value="Personal">Personal</option>
         </select>
         <i class="fas fa-tag input-icon"></i>
       </div>
@@ -122,9 +122,9 @@
       <div class="form-group">
         <select name="priority" id="edit-priority" required>
           <option value="">Select Priority</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
         </select>
         <i class="fas fa-flag input-icon"></i>
       </div>
@@ -169,6 +169,11 @@
           <label for="edit-user-email">Email:</label>
           <input type="email" id="edit-user-email" name="gmail" required>
           <i class="fas fa-envelope input-icon"></i>
+        </div>
+        <div class="form-group">
+          <label for="edit-user-student_id">ID:</label>
+          <input type="text" id="edit-user-student_id" name="student_id" required>
+          <i class="fas fa-birthday-cake input-icon"></i>
         </div>
         <div class="form-group">
           <label for="edit-user-age">Age:</label>
@@ -354,8 +359,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     console.log("All sections hidden");
   }
-  
-  // Enhanced calendar initialization function with view-specific settings
+// REPLACEMENT FOR ENTIRE showCalendar FUNCTION
 function showCalendar() {
   // Make sure calendar container is visible
   if (calendarEl) {
@@ -368,229 +372,298 @@ function showCalendar() {
     // Force layout recalculation
     void calendarEl.offsetHeight;
     
-    // Initialize calendar with a delay to ensure container is visible
-    setTimeout(() => {
-      // Check if calendar already exists
-      if (calendar) {
-        calendar.destroy();
-      }
-      
-      // Create a new calendar instance with improved configuration
-      calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        height: 'auto',
-        aspectRatio: 1.35,
-        themeSystem: 'standard',
-        editable: false,
-        selectable: true,
+    // Destroy existing calendar if any
+    if (calendar) {
+      calendar.destroy();
+    }
+    
+    // Fetch tasks
+    fetch('/get_tasks')
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to load tasks');
+        return response.json();
+      })
+      .then(rawData => {
+        console.log("Raw task data:", rawData);
         
-        // Enhanced events loading with error handling and proper formatting for all views
-        events: function(info, successCallback, failureCallback) {
-          fetch('/get_tasks')
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Failed to load tasks');
-              }
-              return response.json();
-            })
-            .then(data => {
-              // Process events to ensure they work in all views
-              const formattedEvents = data.map(event => {
-                // Extract time from the start date string if available
-                let startDate = event.start;
-                let endDate = event.start; // Default end to same as start
-                
-                // Create proper datetime objects for week/day views
-                if (startDate) {
-                  // Check if we have a date and time
-                  const hasTime = event.extendedProps && event.extendedProps.time;
-                  
-                  if (hasTime) {
-                    // Convert time string (e.g. "2:30 PM") to 24-hour format for JavaScript Date
-                    let hours = 0;
-                    let minutes = 0;
-                    
-                    try {
-                      const timeParts = event.extendedProps.time.match(/(\d+):(\d+)\s*([AP]M)/i);
-                      if (timeParts) {
-                        hours = parseInt(timeParts[1]);
-                        minutes = parseInt(timeParts[2]);
-                        const ampm = timeParts[3].toUpperCase();
-                        
-                        if (ampm === 'PM' && hours < 12) hours += 12;
-                        if (ampm === 'AM' && hours === 12) hours = 0;
-                      }
-                    } catch (e) {
-                      console.error("Error parsing time:", e);
-                    }
-                    
-                    // Create a proper date object
-                    const dateObj = new Date(startDate);
-                    dateObj.setHours(hours, minutes, 0);
-                    startDate = dateObj.toISOString();
-                    
-                    // Set end time 1 hour later for better visibility in week/day views
-                    const endDateObj = new Date(dateObj);
-                    endDateObj.setHours(hours + 1, minutes, 0);
-                    endDate = endDateObj.toISOString();
-                  }
-                }
-                
-                // Return properly formatted event object that works in all views
-                return {
-                  id: event.id,
-                  title: event.title,
-                  start: startDate,
-                  end: endDate, // Add end time for week/day views
-                  allDay: !(event.extendedProps && event.extendedProps.time), // Set allDay based on whether we have a time
-                  backgroundColor: getEventColor(event.extendedProps?.priority),
-                  borderColor: getEventColor(event.extendedProps?.priority),
-                  textColor: '#ffffff',
-                  extendedProps: {
-                    priority: event.extendedProps?.priority || 'low',
-                    type: event.extendedProps?.type || '',
-                    subject: event.extendedProps?.subject || '',
-                    time: event.extendedProps?.time || ''
-                  }
-                };
-              });
-              
-              console.log("Loaded and formatted events for calendar:", formattedEvents);
-              successCallback(formattedEvents);
-            })
-            .catch(error => {
-              console.error("Error loading calendar events:", error);
-              failureCallback(error);
-            });
-        },
-        
-        // View-specific options
-        views: {
-          timeGridWeek: {
-            slotMinTime: '06:00:00',
-            slotMaxTime: '22:00:00',
-            nowIndicator: true,
-            slotEventOverlap: false, // Prevent event overlap for better visibility
-            slotDuration: '00:30:00' // 30-minute slots for better granularity
-          },
-          timeGridDay: {
-            slotMinTime: '06:00:00',
-            slotMaxTime: '22:00:00',
-            nowIndicator: true,
-            slotEventOverlap: false,
-            slotDuration: '00:30:00'
+        // Create properly formatted events from raw data
+        const events = rawData.map(task => {
+          // Process the date
+          const dateStr = task.due || (task.start ? task.start.split('T')[0] : null);
+          if (!dateStr) {
+            console.error("No valid date found for task:", task);
+            return null;
           }
-        },
-        
-        eventDidMount: function(info) {
-          // Event mounting logic - customize based on view type
-          const viewType = info.view.type;
-          console.log("Event mounted in view:", viewType, "Event:", info.event.title);
           
-          // Different tooltip handling based on view
-          const tooltip = document.createElement('div');
-          tooltip.classList.add('task-tooltip');
+          // Extract time information
+          const timeStr = task.time || task.extendedProps?.time;
+          console.log(`Processing task: ${task.title}, Date: ${dateStr}, Time: ${timeStr}`);
           
-          let tooltipContent = `
-            <strong>${info.event.title}</strong><br>
-            Priority: ${info.event.extendedProps.priority || 'N/A'}<br>
-          `;
+          // If no time specified, create all-day event
+          if (!timeStr || timeStr.trim() === '') {
+            console.log(`Creating all-day event for: ${task.title}`);
+            return {
+              id: task.id,
+              title: task.title,
+              start: dateStr,
+              allDay: true,
+              backgroundColor: getEventColor(task.priority || task.extendedProps?.priority),
+              borderColor: getEventColor(task.priority || task.extendedProps?.priority),
+              textColor: '#ffffff',
+              extendedProps: {
+                priority: task.priority || task.extendedProps?.priority || 'low',
+                type: task.type || task.extendedProps?.type || '',
+                subject: task.subject || task.extendedProps?.subject || ''
+              }
+            };
+          }
           
-          // Add more details for month view
-          if (viewType === 'dayGridMonth') {
-            tooltipContent += `Due: ${info.event.extendedProps.time ? info.event.start.toLocaleDateString() + ' ' + info.event.extendedProps.time : info.event.start.toLocaleDateString()}`;
+          // Parse the time properly for timed events
+          let hours = 0;
+          let minutes = 0;
+          
+          // Try to parse 12-hour format first (e.g., "3:00 PM")
+          const amPmMatch = timeStr.match(/(\d+):(\d+)\s*([AP]M)/i);
+          if (amPmMatch) {
+            hours = parseInt(amPmMatch[1]);
+            minutes = parseInt(amPmMatch[2]);
+            const ampm = amPmMatch[3].toUpperCase();
+            
+            if (ampm === 'PM' && hours < 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+            
+            console.log(`Parsed 12-hour time: ${hours}:${minutes} from ${timeStr}`);
           } else {
-            // Simpler tooltip for week/day views since they already show the time
-            tooltipContent += `Type: ${info.event.extendedProps.type || 'N/A'}`;
-            if (info.event.extendedProps.subject) {
-              tooltipContent += `<br>Subject: ${info.event.extendedProps.subject}`;
+            // Try 24-hour format (e.g., "15:00")
+            const militaryMatch = timeStr.match(/(\d+):(\d+)/);
+            if (militaryMatch) {
+              hours = parseInt(militaryMatch[1]);
+              minutes = parseInt(militaryMatch[2]);
+              console.log(`Parsed 24-hour time: ${hours}:${minutes} from ${timeStr}`);
+            } else {
+              console.warn("Could not parse time format:", timeStr);
+              // If we can't parse the time, default to all-day event
+              return {
+                id: task.id,
+                title: task.title,
+                start: dateStr,
+                allDay: true,
+                backgroundColor: getEventColor(task.priority || task.extendedProps?.priority),
+                borderColor: getEventColor(task.priority || task.extendedProps?.priority),
+                textColor: '#ffffff',
+                extendedProps: {
+                  priority: task.priority || task.extendedProps?.priority || 'low',
+                  type: task.type || task.extendedProps?.type || '',
+                  subject: task.subject || task.extendedProps?.subject || '',
+                  time: timeStr
+                }
+              };
             }
           }
           
-          tooltip.innerHTML = tooltipContent;
-          info.el.appendChild(tooltip);
+          // Create proper ISO timestamp for start time
+          const startDateTime = new Date(dateStr);
+          startDateTime.setHours(hours, minutes, 0, 0);
           
-          // Show/hide tooltip on hover
-          info.el.addEventListener('mouseover', function() {
-            tooltip.style.display = 'block';
-          });
-          info.el.addEventListener('mouseout', function() {
-            tooltip.style.display = 'none';
-          });
+          // Create end time (1 hour later by default)
+          const endDateTime = new Date(startDateTime);
+          endDateTime.setHours(startDateTime.getHours() + 1);
           
-          // Apply custom styling for week/day views to ensure visibility
-          if (viewType.includes('timeGrid')) {
-            info.el.style.minHeight = '25px';
-            info.el.style.fontSize = '0.85em';
-            info.el.style.zIndex = '5';
-            info.el.style.overflow = 'hidden';
-            info.el.style.padding = '2px 4px';
-          }
+          console.log(`Creating timed event: ${task.title} at ${startDateTime.toISOString()}, allDay: false`);
           
-          // Apply color based on priority
-          info.el.style.backgroundColor = getEventColor(info.event.extendedProps.priority);
-        },
+          // Return timed event with proper format
+          return {
+            id: task.id,
+            title: task.title,
+            start: startDateTime.toISOString(),
+            end: endDateTime.toISOString(),
+            allDay: false, // CRITICAL: must be false for timed events
+            backgroundColor: getEventColor(task.priority || task.extendedProps?.priority),
+            borderColor: getEventColor(task.priority || task.extendedProps?.priority),
+            textColor: '#ffffff',
+            extendedProps: {
+              priority: task.priority || task.extendedProps?.priority || 'low',
+              type: task.type || task.extendedProps?.type || '',
+              subject: task.subject || task.extendedProps?.subject || '',
+              time: timeStr // Keep original time string for display
+            }
+          };
+        }).filter(event => event !== null);
         
-        eventClick: function(info) {
-          // Show modal or alert with task details
-          let alertText = `Task: ${info.event.title}
+        console.log("Formatted events:", events);
+        
+        // Initialize calendar with better defaults for time display
+        calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'timeGridWeek', // Start with week view to see time slots better
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          },
+          height: 'auto',
+          aspectRatio: 1.35,
+          themeSystem: 'standard',
+          editable: false,
+          selectable: true,
+          events: events,
+          displayEventTime: true, // Ensure event time is displayed
+          displayEventEnd: true, // Display end time too
+          eventTimeFormat: { // Format for time display
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: 'short'
+          },
+          
+          // View-specific options
+          views: {
+            timeGridWeek: {
+              slotMinTime: '06:00:00',
+              slotMaxTime: '22:00:00',
+              nowIndicator: true,
+              slotEventOverlap: false,
+              slotDuration: '00:30:00'
+            },
+            timeGridDay: {
+              slotMinTime: '06:00:00',
+              slotMaxTime: '22:00:00',
+              nowIndicator: true,
+              slotEventOverlap: false,
+              slotDuration: '00:30:00'
+            }
+          },
+          
+          eventDidMount: function(info) {
+            // Create tooltip with event details
+            const tooltip = document.createElement('div');
+            tooltip.classList.add('task-tooltip');
+            
+            // Format tooltip based on view type
+            const viewType = info.view.type;
+            
+            let tooltipContent = `
+              <strong>${info.event.title}</strong><br>
+              Priority: ${info.event.extendedProps.priority || 'N/A'}<br>
+            `;
+            
+            if (viewType === 'dayGridMonth') {
+              tooltipContent += `Due: ${info.event.extendedProps.time ? 
+                new Date(info.event.start).toLocaleDateString() + ' ' + info.event.extendedProps.time : 
+                new Date(info.event.start).toLocaleDateString()}`;
+            } else {
+              tooltipContent += `Type: ${info.event.extendedProps.type || 'N/A'}`;
+              if (info.event.extendedProps.subject) {
+                tooltipContent += `<br>Subject: ${info.event.extendedProps.subject}`;
+              }
+            }
+            
+            tooltip.innerHTML = tooltipContent;
+            info.el.appendChild(tooltip);
+            
+            // Show/hide tooltip on hover
+            info.el.addEventListener('mouseover', function() {
+              tooltip.style.display = 'block';
+            });
+            info.el.addEventListener('mouseout', function() {
+              tooltip.style.display = 'none';
+            });
+            
+            // Debug event rendering
+            console.log(`Event mounted: "${info.event.title}", allDay: ${info.event.allDay}, start: ${info.event.start}`);
+            
+            // Apply custom styling
+            if (viewType.includes('timeGrid')) {
+              info.el.style.minHeight = '25px';
+              info.el.style.fontSize = '0.85em';
+              info.el.style.zIndex = '5';
+              
+              // Make sure timed events are clearly visible with border and padding
+              if (!info.event.allDay) {
+                info.el.style.border = '2px solid ' + info.event.borderColor;
+                info.el.style.padding = '2px 4px';
+                info.el.style.fontWeight = 'bold';
+              }
+            }
+            
+            // Apply color based on priority
+            info.el.style.backgroundColor = getEventColor(info.event.extendedProps.priority);
+          },
+          
+          eventClick: function(info) {
+            // Show task details on click
+            let alertText = `Task: ${info.event.title}
 Priority: ${info.event.extendedProps.priority || 'N/A'}
 Type: ${info.event.extendedProps.type || 'N/A'}`;
 
-          if (info.event.extendedProps.subject) {
-            alertText += `\nSubject: ${info.event.extendedProps.subject}`;
+            if (info.event.extendedProps.subject) {
+              alertText += `\nSubject: ${info.event.extendedProps.subject}`;
+            }
+            
+            const formattedTime = info.event.extendedProps.time || 
+                                 (info.event.allDay ? 'All day' : 
+                                  new Date(info.event.start).toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'}));
+            
+            alertText += `\nDue: ${new Date(info.event.start).toLocaleDateString()} ${formattedTime}`;
+            
+            alert(alertText);
           }
-          
-          alertText += `\nDue: ${info.event.start ? 
-            info.event.start.toLocaleDateString() + 
-            (info.event.extendedProps.time ? ' ' + info.event.extendedProps.time : '') : 'N/A'}`;
-          
-          alert(alertText);
-        },
+        });
         
-        // Handle view changes to ensure events are rendered correctly
-        viewDidMount: function(info) {
-          console.log("View changed to:", info.view.type);
-          
-          // Special handling for week/day views
-          if (info.view.type.includes('timeGrid')) {
-            console.log("Preparing timeGrid view");
-            // Force event re-rendering for timeGrid views
-            setTimeout(() => {
-              if (calendar) {
-                // Update any view-specific settings
-                calendar.updateSize();
-              }
-            }, 100);
+        console.log("Rendering calendar...");
+        calendar.render();
+        console.log("Calendar rendered successfully");
+        
+        // Force calendar to update size after rendering
+        setTimeout(() => {
+          if (calendar) {
+            calendar.updateSize();
+            console.log("Calendar size updated");
           }
-        }
+        }, 300);
+      })
+      .catch(error => {
+        console.error("Error initializing calendar:", error);
+        alert('Failed to load calendar data. Please try again.');
       });
-      
-      console.log("Rendering calendar...");
-      calendar.render();
-      console.log("Calendar rendered successfully");
-      
-      // Force calendar to update size after rendering
-      setTimeout(() => {
-        if (calendar) {
-          calendar.updateSize();
-          console.log("Calendar size updated");
-        }
-      }, 300);
-    }, 300);
   } else {
     console.error("Calendar element not found!");
   }
 }
 
-// Enhanced CSS for better tooltip and event visibility
-const calendarStyles = document.createElement('style');
-calendarStyles.textContent = `
+// Add these styles to fix calendar event display issues
+const calendarFixStyles = document.createElement('style');
+calendarFixStyles.textContent = `
+  /* Force timed events to be visible */
+  .fc-timegrid-event {
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-height: 25px !important;
+    padding: 2px 4px !important;
+  }
+  
+  /* Make event time more visible */
+  .fc-event-time {
+    font-weight: bold !important;
+    opacity: 1 !important;
+  }
+  
+  /* Force calendar slots to be visible */
+  .fc-timegrid-slot, .fc-timegrid-slot-lane {
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+  
+  /* Better event styling */
+  .fc-event {
+    border-width: 2px !important;
+    margin: 1px 0 !important;
+  }
+  
+  /* Ensure events aren't hidden by z-index issues */
+  .fc-timegrid-event-harness {
+    z-index: 10 !important;
+  }
+  
+  /* Improve tooltips */
   .task-tooltip {
     position: absolute;
     z-index: 1000;
@@ -602,45 +675,23 @@ calendarStyles.textContent = `
     display: none;
     top: 100%;
     left: 0;
-    min-width: 150px;
+    min-width: 200px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     pointer-events: none;
   }
   
-  /* Ensure events in week/day view are visible */
-  .fc-timegrid-event-harness {
-    z-index: 3 !important;
+  /* Reset any Full Calendar properties that might be overridden */
+  .fc .fc-timegrid-col.fc-day-today {
+    background-color: rgba(255, 220, 40, 0.15) !important;
   }
   
-  .fc-timegrid-event {
-    min-height: 25px !important;
-    padding: 3px !important;
-    font-size: 0.85em !important;
-  }
-  
-  /* Make time more visible in week/day views */
-  .fc-event-time {
-    font-weight: bold !important;
-    margin-right: 3px !important;
-  }
-  
-  /* Make sure events in month view have enough height */
-  .fc-daygrid-event {
-    min-height: 22px;
-    margin-bottom: 2px;
-    padding: 3px 5px;
-  }
-  
-  /* Fix for specific FullCalendar appearance issues */
-  .fc-v-event {
-    border: none !important;
-  }
-  
-  /* Ensure columns are wide enough in week view */
-  .fc-timegrid-col {
-    min-width: 100px !important;
+  /* Make current time indicator more visible */  
+  .fc-timegrid-now-indicator-line {
+    border-color: #ff3838 !important;
+    border-width: 2px !important;
   }
 `;
-document.head.appendChild(calendarStyles);
+document.head.appendChild(calendarFixStyles);
 
 // Helper function to get color based on priority
 function getEventColor(priority) {

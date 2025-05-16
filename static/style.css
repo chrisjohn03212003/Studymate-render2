@@ -125,7 +125,7 @@ body {
 
 .register_container {
   max-width: 450px;
-  max-height: 600px;
+  max-height: 630px;
   margin: auto;
   padding: 3rem;
   background-color: rgba(30, 30, 47, 0.85);
@@ -146,7 +146,7 @@ h1.welcome-title {
   color: #00fdfd;
   text-align: center;
   font-size: 38px;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
   position: relative;
   animation: glow 2s infinite alternate;
 }
@@ -277,6 +277,7 @@ select{
   outline: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  font-size: 17px;
 }
 
 input[type="text"]:focus,

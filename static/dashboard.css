@@ -7,7 +7,7 @@
   --neon-pink: #ff2a6d;
   --neon-purple: #bd00ff;
   --neon-blue: #01c8ee;
-  --neon-cyan: #05d9e8;
+  --neon-cyan: #ffffff;
   --neon-gradient: linear-gradient(90deg, #ff2a6d, #bd00ff, #01c8ee);
   --text-primary: #ffffff;
   --text-secondary: #b8c1ec;
@@ -256,55 +256,52 @@ button:hover {
 form {
   background-color: rgba(30, 30, 47, 0.6);
   border-radius: 18px;
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 22px rgba(85, 215, 247, 0.9);
   padding: 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 50pxpx;
-  transform: translateY(20px);
-  opacity: 0;
-  transition: all 0.5s ease-out;
+  margin-bottom: 50px;
   max-height: 490px;
+  animation-duration: 5s;
 }
 
-/* Class added via JS when page loads */
-form.animate-in {
-  transform: translateY(0);
-  opacity: 2;
-  animation: glowPulse 2s infinite alternate;
-}
-
-@keyframes glowPulse {
-  from {
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
-  }
-  to {
-    box-shadow: 0 0 30px rgba(223, 85, 247, 0.8), 0 0 50px rgba(0, 234, 255, 0.3);
-  }
-}
-
+/* FIX: Updated form-group to ensure proper positioning */
 .form-group {
   margin-bottom: 20px;
   position: relative;
+  width: 100%;
+}
+
+/* FIX: Improved input icon positioning */
+.form-group .input-icon {
+  position: absolute;
+  left: 12px;
+  top: 38px; /* FIX: Positioned to align with input */
+  transform: translateY(-50%);
+  color: darkviolet;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form_group text {
   width: 100%;
   padding: 12px 15px 12px 40px;
   border: 1px solid rgba(5, 212, 249, 0.836);
   border-radius: var(--border-radius);
   background-color: rgba(15, 23, 42, 0.6);
-  color: var(--text-primary);
+  color: #fcfcfc;
   font-size: 1rem;
   transition: all 0.3s ease;
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form_group text:focus {
   outline: none;
-  border-color: var(--neon-cyan);
+  border-color: #892682;
   box-shadow: 0 0 0 2px rgba(5, 217, 232, 0.2);
   background-color: rgba(22, 33, 62, 0.8);
 }
@@ -312,21 +309,35 @@ form.animate-in {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: var(--neon-cyan);
+  color: #ea00ff;
   font-weight: 500;
 }
 
-.input-icon {
+/* FIX: User info display fixes */
+.user-info-display .form-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+/* FIX: Fixed positioning of icons in user info display */
+.user-info-display .input-icon {
   position: absolute;
   left: 12px;
-  top: 50%;
+  top: 50%; /* FIX: Centered vertically in the input */
   transform: translateY(-50%);
-  color: var(--neon-cyan);
+  color: #00fdfd;
   pointer-events: none;
+  z-index: 2;
 }
 
 .form-group input::placeholder {
-  color: rgba(184, 193, 236, 0.6);
+  color: #fffeff;
+}
+
+/* FIX: Unified input padding for consistent icon placement */
+.user-info-display input,
+.user-info-display select {
+  padding-left: 40px; /* Make room for the icon */
 }
 
 /* Calendar Styles */
@@ -335,11 +346,11 @@ form.animate-in {
   border-radius: var(--border-radius);
   padding: 20px;
   margin-bottom: 50px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(5, 217, 232, 0.2);
+  box-shadow: 0 0 22px rgba(85, 215, 247, 0.9);
   min-height: 600px;
   opacity: 1 !important;
   visibility: visible !important;
+  animation-duration: 4.5s;
 }
 
 .fc .fc-toolbar-title {
@@ -455,8 +466,8 @@ form.animate-in {
   border-radius: var(--border-radius);
   overflow: hidden;
   margin-bottom: 30px;
-  border: 1px solid rgba(5, 217, 232, 0.2);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 22px rgba(85, 215, 247, 0.9);
+   animation-duration: 6s;
 }
 
 .task-list-header {
@@ -481,6 +492,7 @@ form.animate-in {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: background-color 0.2s ease;
   align-items: center;
+  font-size: 20px;
 }
 
 .task-item:hover {
@@ -678,7 +690,6 @@ form.animate-in {
   background-color: #242424;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #ea00ff;
   align-items: center;
 }
 
@@ -695,26 +706,43 @@ form.animate-in {
   border-radius: var(--border-radius);
   margin-bottom: 20px;
   border: 1px solid rgba(5, 217, 232, 0.2);
+  box-shadow: 0 0 22px rgba(85, 215, 247, 0.9);
+  animation-duration: 4s;
 }
 
+/* FIX: Updated user-data-row to better handle icon alignment */
 .user-data-row {
   display: flex;
   margin-bottom: 15px;
   align-items: center;
+  position: relative; /* Added for positioning */
+}
+
+/* FIX: Improved icon alignment in user data rows */
+.user-data-row .input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00fdfd;
+  z-index: 2;
 }
 
 .user-data-row label {
-  width: 120px;
-  color: var(--neon-cyan);
+  width: 150px;
+  color: #ec00fd;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
+  font-size: 20px;
 }
 
 .user-data-row span {
-  color: var(--text-primary);
-  flex: 1;
+  color: rgb(228, 255, 20);
+  flex: 3;
+  font-size: 23px;
+  padding-left: 40px; /* Make room for the icon */
 }
 
 /* Animation Classes */
@@ -876,8 +904,8 @@ body::after {
 .no-tasks-message {
   text-align: center;
   padding: 30px;
-  font-size: 1.1rem;
-  color: var(--text-secondary);
+  font-size: 1.3rem;
+  color: fuchsia;
 }
 
 .subject-field {
@@ -900,4 +928,20 @@ body::after {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(5, 217, 232, 0.5);
+}
+
+@keyframes breathingShadow {
+  0% {
+    box-shadow: 0 0 10px rgba(85, 215, 247, 0.5), 0 0 20px rgba(234, 0, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(85, 215, 247, 0.8), 0 0 40px rgba(234, 0, 255, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(85, 215, 247, 0.5), 0 0 20px rgba(234, 0, 255, 0.2);
+  }
+}
+
+.user-info-display, form, .task-list-container, .calendar {
+  animation: breathingShadow 4s ease-in-out infinite;
 }
