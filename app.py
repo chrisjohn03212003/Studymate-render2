@@ -12,6 +12,8 @@ import json
 import logging
 import atexit
 import socket
+import string
+import random
 import dns.resolver
 
 # Set up logging
@@ -150,7 +152,77 @@ def validate_email_existence(email):
         return False
     
     # Extract domain for DNS validation
-    domain = email.split('@')[1]
+    domain = email.split('@')[1].lower()
+    local_part = email.split('@')[0].lower()
+    
+    # Special handling for common email providers that don't reliably support existence checking
+    # These providers typically accept any email during SMTP checks as an anti-harvesting measure
+    common_providers = {
+        'gmail.com': {
+            'min_length': 6,  # Gmail requires at least 6 characters
+            'allowed_chars': set(string.ascii_lowercase + string.digits + '.'),
+            'rules': [
+                # No consecutive dots
+                lambda x: '..' not in x,
+                # Must start with letter or number
+                lambda x: x[0] in string.ascii_lowercase + string.digits,
+                # Gmail ignores dots, so 'j.doe' and 'jdoe' are the same account
+                # Can't start with dot
+                lambda x: not x.startswith('.'),
+                # Can't end with dot
+                lambda x: not x.endswith('.'),
+            ]
+        },
+        'yahoo.com': {
+            'min_length': 4,
+            'allowed_chars': set(string.ascii_lowercase + string.digits + '.'),
+            'rules': [
+                # No consecutive dots
+                lambda x: '..' not in x,
+                # Must start with letter or number
+                lambda x: x[0] in string.ascii_lowercase + string.digits,
+            ]
+        },
+        'hotmail.com': {'min_length': 5},
+        'outlook.com': {'min_length': 5},
+        'aol.com': {'min_length': 3},
+        'icloud.com': {'min_length': 3},
+    }
+    
+    # Check for common domains with stricter validation
+    if domain in common_providers:
+        provider_rules = common_providers[domain]
+        
+        # Check minimum length requirement
+        if 'min_length' in provider_rules and len(local_part) < provider_rules['min_length']:
+            return False
+            
+        # Check character set if defined
+        if 'allowed_chars' in provider_rules and not all(c in provider_rules['allowed_chars'] for c in local_part):
+            return False
+            
+        # Check additional rules if defined
+        if 'rules' in provider_rules:
+            for rule_func in provider_rules['rules']:
+                if not rule_func(local_part):
+                    return False
+        
+        # Check for obviously fake accounts
+        common_fake_accounts = [
+            'test', 'user', 'admin', 'info', 'mail', 'email', 'contact',
+            'hello', 'webmaster', 'postmaster', 'support', 'sales', 'marketing',
+            'help', 'abc', '123', 'xyz', 'example', 'sample', 'fake', 'sis',
+            'test123', 'testuser', 'test.user', 'test.account', 'testaccount'
+        ]
+        
+        # Remove dots for Gmail comparison (since they ignore dots)
+        if domain == 'gmail.com':
+            normalized_local = local_part.replace('.', '')
+            if normalized_local in common_fake_accounts:
+                return False
+        else:
+            if local_part in common_fake_accounts:
+                return False
     
     try:
         # Check if domain has MX records (mail exchange servers)
@@ -172,10 +244,14 @@ def validate_email_existence(email):
             # So we simulate a send instead
             smtp.mail('')
             code, _ = smtp.rcpt(email)
-            if code == 250:
+            
+            # For common providers, don't trust the SMTP response as reliable
+            if domain in common_providers:
+                # Instead rely on our more specific checks above
                 return True
             else:
-                return False
+                # For other domains, trust the SMTP response
+                return code == 250
     
     except (socket.gaierror, socket.error, dns.resolver.NXDOMAIN, 
             dns.resolver.NoAnswer, dns.exception.Timeout, smtplib.SMTPException):
@@ -203,9 +279,29 @@ def validate_email(email, check_existence=True):
     
     # If existence check is requested
     exists = True
+    details = ""
+    
     if check_existence:
         try:
             exists = validate_email_existence(email)
+            
+            # Add more specific details for common fake patterns
+            domain = email.split('@')[1].lower()
+            local_part = email.split('@')[0].lower()
+            
+            if not exists:
+                if domain == "gmail.com":
+                    # Gmail-specific details
+                    if len(local_part) < 6:
+                        details = "Gmail addresses must be at least 6 characters"
+                    elif local_part in ['test', 'user', 'admin', 'sis', 'info']:
+                        details = f"'{local_part}@gmail.com' is a commonly used fake email pattern"
+                    else:
+                        details = "This Gmail address appears to be invalid"
+                elif domain in ["yahoo.com", "hotmail.com", "outlook.com"]:
+                    details = f"This {domain} address appears to be invalid"
+                
+            
         except Exception as e:
             # Fallback if the existence check fails
             exists = "unknown"
@@ -214,9 +310,11 @@ def validate_email(email, check_existence=True):
         "is_valid": exists is True,  # Only True if both format valid and exists
         "format_valid": True,
         "exists": exists,
+        "details": details,
         "message": "Email is valid and exists" if exists is True else 
-                  "Email format is valid but may not exist" if exists is "unknown" else
-                  "Email format is valid but does not exist"
+                  ("Email format is valid but may not exist" if exists is "unknown" else
+                  f"Email format is valid but does not exist. {details}" if details else
+                  "Email format is valid but does not exist")
     }
 def validate_name(name):
     """Validate that name contains only letters and spaces."""
@@ -253,6 +351,7 @@ def email_validation_route(email):
         **result
     })
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -270,9 +369,10 @@ def register():
             return render_template("register.html", 
                 error="Invalid student ID format. ID should start with letters followed by 9 numbers (e.g., UA202200077) and should not contain repetitive digits.")
         
-        # Validate email
-        if not validate_email(gmail):
-            return render_template("register.html", error="Invalid email format. Please enter a valid email address.")
+        # Validate email with enhanced validation
+        is_valid_email, email_error = validate_email(gmail, check_existence=True)
+        if not is_valid_email:
+            return render_template("register.html", error=email_error)
             
         # Check if email already exists
         existing_users = db.collection("users").where("gmail", "==", gmail).get()
@@ -314,13 +414,95 @@ StudyMate System
         
         return redirect(url_for("login"))
     return render_template("register.html")
-
 # All other route handlers remain unchanged...
 @app.route("/update_user", methods=["POST"])
 def update_user():
     if "user" not in session:
         return redirect(url_for("login"))
-    # Rest of the function remains the same...
+        
+    user_id = session["user"]
+    name = request.form.get("name")
+    gmail = request.form.get("gmail")
+    age = request.form.get("age")
+    student_id = request.form.get("student_id")  # Get student_id for updating
+    
+    if not name or not gmail or not age:
+        return "Missing required fields", 400
+    
+    # Validate name
+    if not validate_name(name):
+        return "Name should contain only letters and spaces", 400
+    
+    # Validate email
+    if not validate_email(gmail):
+        return "Invalid email format", 400
+    
+    # Validate age (must be a 2-digit number)
+    try:
+        age_int = int(age)
+        if age_int < 10 or age_int > 99:
+            return "Age must be a 2-digit number (10-99)", 400
+    except ValueError:
+        return "Age must be a valid number", 400
+        
+    # If student_id is provided and being updated
+    if student_id and student_id != user_id:
+        # Validate the new student ID
+        if not validate_student_id(student_id):
+            return "Invalid student ID format. ID should start with letters followed by 9 numbers (e.g., UA202200077) and should not contain repetitive digits.", 400
+            
+        # Check if the new student_id already exists
+        doc_ref = db.collection("users").document(student_id).get()
+        if doc_ref.exists:
+            return "Student ID already exists", 400
+            
+        # Create a new document with the updated student_id
+        user_data = db.collection("users").document(user_id).get().to_dict()
+        user_data.update({
+            "name": name,
+            "gmail": gmail,
+            "age": age
+        })
+        
+        # Start a transaction to update student_id
+        transaction = db.transaction()
+        
+        @firestore.transactional
+        def update_in_transaction(transaction, old_id, new_id, data):
+            # Create new document
+            transaction.set(db.collection("users").document(new_id), data)
+            
+            # Delete old document
+            transaction.delete(db.collection("users").document(old_id))
+            
+            # Update session
+            session["user"] = new_id
+            
+            return True
+            
+        update_success = update_in_transaction(transaction, user_id, student_id, user_data)
+        
+        if not update_success:
+            return "Failed to update student ID", 500
+            
+        # Update user_id for tasks and other operations
+        user_id = student_id
+    else:
+        # Update the user document with the same student_id
+        db.collection("users").document(user_id).update({
+            "name": name,
+            "gmail": gmail,
+            "age": age
+        })
+    
+    # Update gmail in all tasks
+    tasks_ref = db.collection("users").document(user_id).collection("tasks")
+    tasks = tasks_ref.stream()
+    
+    for task in tasks:
+        tasks_ref.document(task.id).update({"gmail": gmail})
+    
+    return redirect(url_for("dashboard")).
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -1022,6 +1204,12 @@ scheduler = init_scheduler()
 
 # For Render web services - this is critical
 if __name__ == "__main__":
+   # Test the email validation function
+    test_email = "user@example.com"
+    result = validate_email(test_email)
+    print(f"Email {test_email} validation result:")
+    for key, value in result.items():
+        print(f"  {key}: {value}")
     # Set port for Render compatibility
     port = int(os.environ.get("PORT", 5000))
     
