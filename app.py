@@ -11,10 +11,7 @@ import re
 import json
 import logging
 import atexit
-import socket
-import string
-import random
-import dns.resolver
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, 
@@ -112,8 +109,8 @@ def base():
 def ping():
     """Health check endpoint for keeping the service alive"""
     return 'pong', 200
-
-def validate_email_format(email):
+  
+def validate_email(email):
     """
     Validate email format using regex.
     
@@ -121,201 +118,12 @@ def validate_email_format(email):
         email: Email address to validate
         
     Returns:
-        bool: True if format is valid, False otherwise
+        bool: True if valid, False otherwise
     """
-    if email is None or not isinstance(email, str):
-        return False
-        
-    # Trim whitespace
-    email = email.strip()
-    
-    if not email or len(email) > 254:  # RFC 5321 maximum
-        return False
-    
-    pattern = r'^(?!.*\.\.)[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$'
-    
+    # Basic email validation pattern
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(pattern, email))
 
-def validate_email_existence(email):
-    """
-    Validate email by checking domain existence and SMTP response.
-    Requires: dnspython package.
-    
-    Args:
-        email: Email address to validate
-        
-    Returns:
-        bool: True if exists (likely), False otherwise
-    """
-    # First check format
-    if not validate_email_format(email):
-        return False
-    
-    # Extract domain for DNS validation
-    domain = email.split('@')[1].lower()
-    local_part = email.split('@')[0].lower()
-    
-    # Special handling for common email providers that don't reliably support existence checking
-    # These providers typically accept any email during SMTP checks as an anti-harvesting measure
-    common_providers = {
-        'gmail.com': {
-            'min_length': 6,  # Gmail requires at least 6 characters
-            'allowed_chars': set(string.ascii_lowercase + string.digits + '.'),
-            'rules': [
-                # No consecutive dots
-                lambda x: '..' not in x,
-                # Must start with letter or number
-                lambda x: x[0] in string.ascii_lowercase + string.digits,
-                # Gmail ignores dots, so 'j.doe' and 'jdoe' are the same account
-                # Can't start with dot
-                lambda x: not x.startswith('.'),
-                # Can't end with dot
-                lambda x: not x.endswith('.'),
-            ]
-        },
-        'yahoo.com': {
-            'min_length': 4,
-            'allowed_chars': set(string.ascii_lowercase + string.digits + '.'),
-            'rules': [
-                # No consecutive dots
-                lambda x: '..' not in x,
-                # Must start with letter or number
-                lambda x: x[0] in string.ascii_lowercase + string.digits,
-            ]
-        },
-        'hotmail.com': {'min_length': 5},
-        'outlook.com': {'min_length': 5},
-        'aol.com': {'min_length': 3},
-        'icloud.com': {'min_length': 3},
-    }
-    
-    # Check for common domains with stricter validation
-    if domain in common_providers:
-        provider_rules = common_providers[domain]
-        
-        # Check minimum length requirement
-        if 'min_length' in provider_rules and len(local_part) < provider_rules['min_length']:
-            return False
-            
-        # Check character set if defined
-        if 'allowed_chars' in provider_rules and not all(c in provider_rules['allowed_chars'] for c in local_part):
-            return False
-            
-        # Check additional rules if defined
-        if 'rules' in provider_rules:
-            for rule_func in provider_rules['rules']:
-                if not rule_func(local_part):
-                    return False
-        
-        # Check for obviously fake accounts
-        common_fake_accounts = [
-            'test', 'user', 'admin', 'info', 'mail', 'email', 'contact',
-            'hello', 'webmaster', 'postmaster', 'support', 'sales', 'marketing',
-            'help', 'abc', '123', 'xyz', 'example', 'sample', 'fake', 'sis',
-            'test123', 'testuser', 'test.user', 'test.account', 'testaccount'
-        ]
-        
-        # Remove dots for Gmail comparison (since they ignore dots)
-        if domain == 'gmail.com':
-            normalized_local = local_part.replace('.', '')
-            if normalized_local in common_fake_accounts:
-                return False
-        else:
-            if local_part in common_fake_accounts:
-                return False
-    
-    try:
-        # Check if domain has MX records (mail exchange servers)
-        mx_records = dns.resolver.resolve(domain, 'MX')
-        if not mx_records:
-            return False
-        
-        # Get the mail server with lowest preference value
-        mail_server = str(mx_records[0].exchange)
-        
-        # Verify SMTP connection
-        with smtplib.SMTP(timeout=10) as smtp:
-            smtp.connect(mail_server)
-            status_code = smtp.helo()[0]
-            if status_code != 250:
-                return False
-            
-            # Some servers block VRFY command to prevent email harvesting
-            # So we simulate a send instead
-            smtp.mail('')
-            code, _ = smtp.rcpt(email)
-            
-            # For common providers, don't trust the SMTP response as reliable
-            if domain in common_providers:
-                # Instead rely on our more specific checks above
-                return True
-            else:
-                # For other domains, trust the SMTP response
-                return code == 250
-    
-    except (socket.gaierror, socket.error, dns.resolver.NXDOMAIN, 
-            dns.resolver.NoAnswer, dns.exception.Timeout, smtplib.SMTPException):
-        return False
-
-def validate_email(email, check_existence=True):
-    """
-    Complete email validation - format and existence.
-    
-    Args:
-        email: Email address to validate
-        check_existence: Whether to check if email actually exists
-        
-    Returns:
-        dict: Result with validation status and details
-    """
-    # Check format first
-    if not validate_email_format(email):
-        return {
-            "is_valid": False,
-            "format_valid": False,
-            "exists": False,
-            "message": "Invalid email format"
-        }
-    
-    # If existence check is requested
-    exists = True
-    details = ""
-    
-    if check_existence:
-        try:
-            exists = validate_email_existence(email)
-            
-            # Add more specific details for common fake patterns
-            domain = email.split('@')[1].lower()
-            local_part = email.split('@')[0].lower()
-            
-            if not exists:
-                if domain == "gmail.com":
-                    # Gmail-specific details
-                    if len(local_part) < 6:
-                        details = "Gmail addresses must be at least 6 characters"
-                    elif local_part in ['test', 'user', 'admin', 'sis', 'info']:
-                        details = f"'{local_part}@gmail.com' is a commonly used fake email pattern"
-                    else:
-                        details = "This Gmail address appears to be invalid"
-                elif domain in ["yahoo.com", "hotmail.com", "outlook.com"]:
-                    details = f"This {domain} address appears to be invalid"
-                
-            
-        except Exception as e:
-            # Fallback if the existence check fails
-            exists = "unknown"
-    
-    return {
-        "is_valid": exists is True,  # Only True if both format valid and exists
-        "format_valid": True,
-        "exists": exists,
-        "details": details,
-        "message": "Email is valid and exists" if exists is True else 
-                  ("Email format is valid but may not exist" if exists is "unknown" else
-                  f"Email format is valid but does not exist. {details}" if details else
-                  "Email format is valid but does not exist")
-    }
 def validate_name(name):
     """Validate that name contains only letters and spaces."""
     return bool(re.match(r'^[A-Za-z\s]+$', name))
@@ -340,17 +148,6 @@ def validate_student_id(student_id):
             
     return True
 
-@app.route('/validate_email/<email>')
-def email_validation_route(email):
-    # Get check_existence parameter (default to True)
-    check_existence = request.args.get('check_existence', 'true').lower() == 'true'
-    
-    result = validate_email(email, check_existence)
-    return jsonify({
-        "email": email,
-        **result
-    })
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -369,10 +166,9 @@ def register():
             return render_template("register.html", 
                 error="Invalid student ID format. ID should start with letters followed by 9 numbers (e.g., UA202200077) and should not contain repetitive digits.")
         
-        # Validate email with enhanced validation
-        is_valid_email, email_error = validate_email(gmail, check_existence=True)
-        if not is_valid_email:
-            return render_template("register.html", error=email_error)
+        # Validate email
+        if not validate_email(gmail):
+            return render_template("register.html", error="Invalid email format. Please enter a valid email address.")
             
         # Check if email already exists
         existing_users = db.collection("users").where("gmail", "==", gmail).get()
@@ -407,14 +203,14 @@ StudyMate System
         """
         
         if send_email(gmail, welcome_subject, welcome_body):
-            logger.info(f"Welcome email sent to {gmail}")
+            print(f"Welcome email sent to {gmail}")
         else:
-            logger.warning(f"Failed to send welcome email to {gmail}")
+            print(f"Failed to send welcome email to {gmail}")
             # You might want to flag this account for email verification issues
         
         return redirect(url_for("login"))
     return render_template("register.html")
-# All other route handlers remain unchanged...
+
 @app.route("/update_user", methods=["POST"])
 def update_user():
     if "user" not in session:
@@ -1204,12 +1000,6 @@ scheduler = init_scheduler()
 
 # For Render web services - this is critical
 if __name__ == "__main__":
-   # Test the email validation function
-    test_email = "user@example.com"
-    result = validate_email(test_email)
-    print(f"Email {test_email} validation result:")
-    for key, value in result.items():
-        print(f"  {key}: {value}")
     # Set port for Render compatibility
     port = int(os.environ.get("PORT", 5000))
     
