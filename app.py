@@ -104,6 +104,11 @@ def send_email(user_email, subject, body, retry=1):
 def base():
     return render_template('base.html')
 
+@app.route('/ping')
+def ping():
+    """Health check endpoint for keeping the service alive"""
+    return 'pong', 200
+
 def validate_email(email):
     """
     Validate email format using regex.
