@@ -1018,7 +1018,7 @@ def init_scheduler():
     """Initialize and start the background scheduler"""
     scheduler = BackgroundScheduler()
     # Schedule the check_reminders function to run every 5 minutes
-    scheduler.add_job(func=check_reminders, trigger="interval", minutes=)
+    scheduler.add_job(func=check_reminders, trigger="interval", minutes=25)
     # Start the scheduler
     scheduler.start()
     logger.info("Scheduler started, running check_reminders every 5 minutes")
