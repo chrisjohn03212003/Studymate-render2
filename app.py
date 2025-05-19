@@ -1007,8 +1007,6 @@ StudyMate System
 
 # Main entry point of the application
 if __name__ == "__main__":
-    from apscheduler.schedulers.background import BackgroundScheduler
-
     # Only start the scheduler once (avoid double start in debug mode)
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         scheduler = BackgroundScheduler()
