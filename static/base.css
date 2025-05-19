@@ -1,0 +1,246 @@
+:root {
+    --primary: #d416de;         /* Purple main color */
+    --primary-dark: #4a0072;    /* Darker purple for hover effects */
+    --primary-light: #761691;
+    --primary-black:#08000b;  /* Lighter purple for accents */
+    --accent: #e040fb;          /* Bright purple accent */
+    --text-primary: #ffffff;    /* White text on dark backgrounds */
+    --text-secondary: #f3e5f5;  /* Light purple text */
+    --divider: #f6f5f8;         /* Light purple divider */
+}
+
+/* General Styles */
+body {
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-image: url("background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  font-size: 20px;
+}
+
+
+
+/* Background and color classes */
+.bg-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+.purple-gradient-bg {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+/* Feature Icons */
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    background-color: var(--primary) !important;
+}
+
+/* Step Circles */
+.step-circle {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-weight: bold;
+    font-size: 1.5rem;
+    background-color: var(--primary) !important;
+}
+
+/* Avatar */
+.avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background-color: var(--primary) !important;
+}
+
+/* Text colors */
+.text-warning {
+    color: var(--primary-light) !important;
+}
+
+/* Logo positioning */
+.logo-container {
+  position: absolute;
+  top: 20px; 
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  z-index: 10;
+  animation: fadeInDown 1s ease-out;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.logo-container img {
+  width: 190px; 
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+/* Logo positioning */
+.logo-container img:nth-child(1) {
+  /* Left logo */
+  animation: logoPulse 2s infinite alternate;
+  animation-delay: 2s;
+}
+
+.logo-container img:nth-child(2) {
+  /* Right logo */
+  animation: logoPulse 2s infinite alternate;
+  animation-delay: 4s;
+}
+
+@keyframes logoPulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px rgb(42, 48, 48));
+  }
+  100% {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 15px rgba(0, 225, 255, 0.8));
+  }
+}
+
+/* Hero section adjustments */
+.hero-section-with-logos {
+    padding-top: 60px; /* Make room for the logo container */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #5a5959;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Media Queries */
+@media (max-width: 767.98px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .feature-icon, .step-circle {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+}
+
+/* Small mobile devices (portrait phones) */
+@media (max-width: 480px) {
+  body {
+    font-size: 16px;
+  }
+  
+  .logo-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    top: 10px;
+    padding: 0 10px;
+  }
+  
+  .logo-container img {
+    width: 130px;
+  }
+
+  .feature-icon, .step-circle {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .hero-section-with-logos {
+    padding-top: 120px; /* Make more room for stacked logos */
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+  }
+}
+
+/* Medium devices (tablets) */
+@media (min-width: 481px) and (max-width: 768px) {
+  body {
+    font-size: 18px;
+  }
+  
+  .logo-container {
+    padding: 0 15px;
+  }
+  
+  .logo-container img {
+    width: 150px;
+  }
+  
+  .hero-section-with-logos {
+    padding-top: 70px;
+  }
+}
+
+/* Large devices (desktops) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .logo-container img {
+    width: 170px;
+  }
+}
+
+/* Extra large devices (large desktops) */
+@media (min-width: 1025px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* Dark mode preference support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #ffffff;
+    --text-secondary: #f3e5f5;
+  }
+}

@@ -15,17 +15,17 @@ body {
 
 /* Updated Logo Container */
 .logo-container {
-  position: fixed;
+  position: absolute;
   top: 20px; 
   left: 20px;
   display: flex;
-  gap: 30px;
+  gap: 45px;
   z-index: 10;
   animation: fadeInDown 1s ease-out;
 }
 
 .logo-container img {
-  width: 125px; 
+  width: 160px; 
   height: auto;
   transition: transform 0.3s ease;
 }
@@ -108,7 +108,7 @@ body {
 
 .login_container {
   max-width: 430px;
-  max-height: 460px;
+  max-height: 490px;
   margin: auto;
   padding: 4rem;
   background-color: rgba(30, 30, 47, 0.85);
@@ -125,7 +125,7 @@ body {
 
 .register_container {
   max-width: 450px;
-  max-height: 630px;
+  max-height: 640px;
   margin: auto;
   padding: 3rem;
   background-color: rgba(30, 30, 47, 0.85);
@@ -214,7 +214,7 @@ form {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   transform: translateY(20px);
   opacity: 0;
   transition: all 0.5s ease-out;
@@ -433,5 +433,188 @@ p {
   
   h2 {
     font-size: 24px;
+  }
+}
+
+/* Small mobile devices (portrait phones) */
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 60px;
+  }
+  
+  .logo-container {
+    flex-direction: column;
+    gap: 10px;
+    top: 10px;
+    left: 10px;
+  }
+  
+  .logo-container img {
+    width: 100px;
+  }
+  
+  .login_container {
+    max-width: 100%;
+    padding: 1.5rem;
+    margin: 0 10px;
+  }
+  
+  .register_container {
+    max-width: 100%;
+    padding: 1.2rem;
+    margin: 0 10px;
+  }
+  
+  h1.welcome-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+  
+  h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .input-group {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select {
+    padding: 0.8rem 2rem 0.8rem 40px;
+    font-size: 15px;
+  }
+  
+  button {
+    padding: 0.7rem 1.5rem;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  .footer {
+    font-size: 14px;
+    bottom: 5px;
+    left: 10px;
+  }
+  
+  form {
+    padding: 20px;
+  }
+}
+
+/* Medium devices (tablets) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .login_container {
+    max-width: 380px;
+    padding: 2rem;
+  }
+  
+  .register_container {
+    max-width: 400px;
+    padding: 2rem;
+  }
+  
+  h1.welcome-title {
+    font-size: 32px;
+  }
+  
+  h2 {
+    font-size: 24px;
+  }
+  
+  .input-group {
+    width: 95%;
+  }
+  
+  .footer {
+    font-size: 16px;
+  }
+}
+
+/* Large devices (desktops) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .login_container {
+    max-width: 400px;
+  }
+  
+  .register_container {
+    max-width: 420px;
+  }
+}
+
+/* Landscape orientation adjustments for mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  body {
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
+  .login_container,
+  .register_container {
+    margin-top: 60px;
+    transform: scale(0.9);
+  }
+  
+  .logo-container {
+    position: fixed;
+    top: 5px;
+    left: 5px;
+  }
+  
+  .logo-container img {
+    width: 80px;
+  }
+  
+  h1.welcome-title {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+  
+  form {
+    padding: 15px;
+  }
+  
+  .input-group {
+    margin-bottom: 0.8rem;
+  }
+}
+
+/* Adding a specific fix for very small devices */
+@media (max-width: 320px) {
+  .logo-container img {
+    width: 80px;
+  }
+  
+  h1.welcome-title {
+    font-size: 22px;
+  }
+  
+  .login_container,
+  .register_container {
+    padding: 1rem;
+  }
+  
+  .input-group .icon {
+    font-size: 16px;
+    left: 10px;
+  }
+  
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select {
+    padding: 0.7rem 1rem 0.7rem 30px;
+    font-size: 14px;
   }
 }

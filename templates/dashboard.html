@@ -21,7 +21,7 @@
   </div>
 
   <div class="container">
-    <h1 class="welcome-title">Welcome To StudyMate</h1>
+    <h1 class="welcome-title">StudyMate DashBoard</h1>
 
     <div class="button-row animate__animated animate__fadeInUp">
       <button id="show-form-btn"><i class="fas fa-plus-circle"></i> Add Task</button>
@@ -162,23 +162,19 @@
       <form id="user-edit-form" action="/update_user" method="POST" style="display: none;">
         <div class="form-group">
           <label for="edit-user-name">Name:</label>
-          <input type="text" id="edit-user-name" name="name" required>
-          <i class="fas fa-user input-icon"></i>
+          <input type="text" id="edit-user-name" name="name" required autocomplete="off">
         </div>
         <div class="form-group">
           <label for="edit-user-email">Email:</label>
-          <input type="email" id="edit-user-email" name="gmail" required>
-          <i class="fas fa-envelope input-icon"></i>
+          <input type="email" id="edit-user-email" name="gmail" required autocomplete="off">
         </div>
         <div class="form-group">
-          <label for="edit-user-student_id">ID:</label>
-          <input type="text" id="edit-user-student_id" name="student_id" required>
-          <i class="fas fa-birthday-cake input-icon"></i>
+          <label for="edit-user-student_id">Id:</label>
+          <input type="text" id="edit-user-student_id" name="student_id" required autocomplete="off">
         </div>
         <div class="form-group">
           <label for="edit-user-age">Age:</label>
-          <input type="number" id="edit-user-age" name="age" required>
-          <i class="fas fa-birthday-cake input-icon"></i>
+          <input type="number" id="edit-user-age" name="age" required autocomplete="off">
         </div>
         <div class="button-row">
           <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Changes</button>
