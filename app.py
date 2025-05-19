@@ -11,6 +11,8 @@ import re
 import json
 import logging
 import atexit
+import socket
+import dns.resolver
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, 
@@ -109,7 +111,7 @@ def ping():
     """Health check endpoint for keeping the service alive"""
     return 'pong', 200
 
-def validate_email(email):
+def validate_email_format(email):
     """
     Validate email format using regex.
     
@@ -117,11 +119,105 @@ def validate_email(email):
         email: Email address to validate
         
     Returns:
-        bool: True if valid, False otherwise
+        bool: True if format is valid, False otherwise
     """
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if email is None or not isinstance(email, str):
+        return False
+        
+    # Trim whitespace
+    email = email.strip()
+    
+    if not email or len(email) > 254:  # RFC 5321 maximum
+        return False
+    
+    pattern = r'^(?!.*\.\.)[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$'
+    
     return bool(re.match(pattern, email))
 
+def validate_email_existence(email):
+    """
+    Validate email by checking domain existence and SMTP response.
+    Requires: dnspython package.
+    
+    Args:
+        email: Email address to validate
+        
+    Returns:
+        bool: True if exists (likely), False otherwise
+    """
+    # First check format
+    if not validate_email_format(email):
+        return False
+    
+    # Extract domain for DNS validation
+    domain = email.split('@')[1]
+    
+    try:
+        # Check if domain has MX records (mail exchange servers)
+        mx_records = dns.resolver.resolve(domain, 'MX')
+        if not mx_records:
+            return False
+        
+        # Get the mail server with lowest preference value
+        mail_server = str(mx_records[0].exchange)
+        
+        # Verify SMTP connection
+        with smtplib.SMTP(timeout=10) as smtp:
+            smtp.connect(mail_server)
+            status_code = smtp.helo()[0]
+            if status_code != 250:
+                return False
+            
+            # Some servers block VRFY command to prevent email harvesting
+            # So we simulate a send instead
+            smtp.mail('')
+            code, _ = smtp.rcpt(email)
+            if code == 250:
+                return True
+            else:
+                return False
+    
+    except (socket.gaierror, socket.error, dns.resolver.NXDOMAIN, 
+            dns.resolver.NoAnswer, dns.exception.Timeout, smtplib.SMTPException):
+        return False
+
+def validate_email(email, check_existence=True):
+    """
+    Complete email validation - format and existence.
+    
+    Args:
+        email: Email address to validate
+        check_existence: Whether to check if email actually exists
+        
+    Returns:
+        dict: Result with validation status and details
+    """
+    # Check format first
+    if not validate_email_format(email):
+        return {
+            "is_valid": False,
+            "format_valid": False,
+            "exists": False,
+            "message": "Invalid email format"
+        }
+    
+    # If existence check is requested
+    exists = True
+    if check_existence:
+        try:
+            exists = validate_email_existence(email)
+        except Exception as e:
+            # Fallback if the existence check fails
+            exists = "unknown"
+    
+    return {
+        "is_valid": exists is True,  # Only True if both format valid and exists
+        "format_valid": True,
+        "exists": exists,
+        "message": "Email is valid and exists" if exists is True else 
+                  "Email format is valid but may not exist" if exists is "unknown" else
+                  "Email format is valid but does not exist"
+    }
 def validate_name(name):
     """Validate that name contains only letters and spaces."""
     return bool(re.match(r'^[A-Za-z\s]+$', name))
@@ -145,6 +241,17 @@ def validate_student_id(student_id):
             return False
             
     return True
+
+@app.route('/validate_email/<email>')
+def email_validation_route(email):
+    # Get check_existence parameter (default to True)
+    check_existence = request.args.get('check_existence', 'true').lower() == 'true'
+    
+    result = validate_email(email, check_existence)
+    return jsonify({
+        "email": email,
+        **result
+    })
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
