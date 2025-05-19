@@ -1007,12 +1007,11 @@ StudyMate System
 
 # Main entry point of the application
 if __name__ == "__main__":
-    # Only start the scheduler once (avoid double start in debug mode)
+  if __name__ == "__main__":
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         scheduler = BackgroundScheduler()
         scheduler.add_job(check_reminders, 'interval', minutes=25)
         scheduler.start()
-        print("✅ Reminder scheduler started")
+        print("Started scheduler")
 
-    # Run the Flask app
-    app.run(debug=os.environ.get("FLASK_DEBUG", "False") == "True", threaded=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True, threaded=True, host='0.0.0.0', port=5000)
