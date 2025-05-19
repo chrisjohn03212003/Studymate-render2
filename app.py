@@ -650,7 +650,7 @@ def get_tasks():
 def check_reminders():
     """Check for tasks that need reminders with enhanced reminder schedule."""
     now = datetime.now()
-    print(f"Running reminder check at {now}")
+    logger.info(f"Running reminder check at {now}")
 
     try:
         users = db.collection("users").get()
@@ -661,12 +661,12 @@ def check_reminders():
             user_doc_data = db.collection("users").document(user_id).get()
             
             if not user_doc_data.exists:
-                print(f"User document {user_id} not found")
+                logger.warning(f"User document {user_id} not found")
                 continue
                 
             user = user_doc_data.to_dict()
             if not user:
-                print(f"User data empty for {user_id}")
+                logger.warning(f"User data empty for {user_id}")
                 continue
                 
             user_name = user.get("name", "")
@@ -674,14 +674,14 @@ def check_reminders():
             
             # Verify user has valid email
             if not user_email or not validate_email(user_email):
-                print(f"Invalid or missing email for user {user_id}: {user_email}")
+                logger.warning(f"Invalid or missing email for user {user_id}: {user_email}")
                 continue
 
             for task in tasks:
                 data = task.to_dict()
 
                 if not data:
-                    print(f"Empty task document {task.id}")
+                    logger.warning(f"Empty task document {task.id}")
                     continue
 
                 # Check if task is already done
@@ -691,7 +691,7 @@ def check_reminders():
                 # Check if email is valid for notifications
                 task_email = data.get("gmail", user_email)
                 if not task_email or not validate_email(task_email):
-                    print(f"Invalid email for task {task.id}: {task_email}")
+                    logger.warning(f"Invalid email for task {task.id}: {task_email}")
                     # Update the task to reflect this
                     tasks_ref.document(task.id).update({
                         "email_verified": False
@@ -721,44 +721,44 @@ def check_reminders():
                             # Convert string timestamp to datetime object
                             last_reminder_time = datetime.fromisoformat(last_reminder_time)
                         except (ValueError, TypeError):
-                            print(f"Invalid last_reminder_time format for task {task.id}")
+                            logger.error(f"Invalid last_reminder_time format for task {task.id}")
                             last_reminder_time = None
 
                     if not due_date_str or not due_time_str or not priority:
-                        print(f"Skipping incomplete task {task.id}: Missing required fields")
+                        logger.warning(f"Skipping incomplete task {task.id}: Missing required fields")
                         continue
 
                     # Debug prints
-                    print(f"Processing task: {title}, due: {due_date_str} {due_time_str}")
+                    logger.debug(f"Processing task: {title}, due: {due_date_str} {due_time_str}")
 
                     # Combine date and time into full datetime with improved parsing
                     try:
                         # Debug prints
-                        print(f"Parsing datetime from: '{due_date_str}' '{due_time_str}'")
+                        logger.debug(f"Parsing datetime from: '{due_date_str}' '{due_time_str}'")
                         
                         # Try different time formats - starting with AM/PM format
                         try:
                             # First try standard AM/PM format
                             full_due_datetime = datetime.strptime(f"{due_date_str} {due_time_str}", "%Y-%m-%d %I:%M %p")
-                            print(f"Successfully parsed as AM/PM format: {full_due_datetime}")
+                            logger.debug(f"Successfully parsed as AM/PM format: {full_due_datetime}")
                         except ValueError:
                             # Try with uppercase AM/PM
                             try:
                                 full_due_datetime = datetime.strptime(f"{due_date_str} {due_time_str}", "%Y-%m-%d %I:%M %P")
-                                print(f"Successfully parsed as uppercase AM/PM format: {full_due_datetime}")
+                                logger.debug(f"Successfully parsed as uppercase AM/PM format: {full_due_datetime}")
                             except ValueError:
                                 # Try without space between time and AM/PM
                                 try:
                                     full_due_datetime = datetime.strptime(f"{due_date_str} {due_time_str}", "%Y-%m-%d %I:%M%p")
-                                    print(f"Successfully parsed as no-space AM/PM format: {full_due_datetime}")
+                                    logger.debug(f"Successfully parsed as no-space AM/PM format: {full_due_datetime}")
                                 except ValueError:
                                     # Try 24-hour format
                                     try:
                                         full_due_datetime = datetime.strptime(f"{due_date_str} {due_time_str}", "%Y-%m-%d %H:%M")
-                                        print(f"Successfully parsed as 24-hour format: {full_due_datetime}")
+                                        logger.debug(f"Successfully parsed as 24-hour format: {full_due_datetime}")
                                     except ValueError:
                                         # Last resort - try to extract time components manually
-                                        print(f"Standard parsing failed. Attempting manual parsing for time: '{due_time_str}'")
+                                        logger.debug(f"Standard parsing failed. Attempting manual parsing for time: '{due_time_str}'")
                                         
                                         # Strip any whitespace
                                         time_clean = due_time_str.strip()
@@ -786,7 +786,7 @@ def check_reminders():
                                             # Create datetime object
                                             date_obj = datetime.strptime(due_date_str, "%Y-%m-%d")
                                             full_due_datetime = date_obj.replace(hour=hour, minute=minute)
-                                            print(f"Manual parsing successful: {full_due_datetime}")
+                                            logger.debug(f"Manual parsing successful: {full_due_datetime}")
                                         else:
                                             # If no colon, assume it's just hours
                                             hour = int(time_clean)
@@ -797,9 +797,9 @@ def check_reminders():
                                                 
                                             date_obj = datetime.strptime(due_date_str, "%Y-%m-%d")
                                             full_due_datetime = date_obj.replace(hour=hour, minute=0)
-                                            print(f"Manual parsing (hours only) successful: {full_due_datetime}")
+                                            logger.debug(f"Manual parsing (hours only) successful: {full_due_datetime}")
                     except ValueError as e:
-                        print(f"Error parsing datetime for task {task.id}: {e}")
+                        logger.error(f"Error parsing datetime for task {task.id}: {e}")
                         continue
 
                     # How much time is left
@@ -812,7 +812,7 @@ def check_reminders():
                     if days_remaining < 0:
                         # Task is overdue - send reminders with proper spacing
                         days_overdue = abs(days_remaining)
-                        print(f"Task '{title}' is past due by {days_overdue:.2f} days")
+                        logger.info(f"Task '{title}' is past due by {days_overdue:.2f} days")
                         
                         # Get time since last overdue reminder
                         time_since_last_reminder = float('inf')
@@ -840,185 +840,152 @@ def check_reminders():
                             # Weekly reminders after first week
                             should_send_overdue = True
                             reminder_frequency = "weekly"
-                            
+                        
                         if should_send_overdue:
-                            # Format time overdue in a user-friendly way
-                            if days_overdue < 1:
-                                overdue_text = f"{int(abs(hours_remaining))} hours"
-                            elif days_overdue < 2:
-                                overdue_text = "1 day"
-                            else:
-                                overdue_text = f"{int(days_overdue)} days"
-                                
-                            # Create email content
-                            subject = f"OVERDUE TASK: '{title}' missed deadline!"
+                            # Send overdue notification
+                            subject = f"OVERDUE TASK: {title}"
                             body = f"""
 Hello {user_name},
 
-⚠️ IMPORTANT: You have an OVERDUE task! ⚠️
+This is a reminder that the following task is OVERDUE:
 
-The following {priority}-priority task is now OVERDUE by {overdue_text}:
-
-Task Title: {title}
+Task: {title}
 Subject: {data.get('subject', 'N/A')}
-Original Due Date: {due_date_str} at {due_time_str}
-Overdue: {overdue_text}
+Type: {data.get('type', 'N/A')}
+Due Date: {due_date_str} at {due_time_str} (was due {days_overdue:.1f} days ago)
+Priority: {priority}
 
-Please complete this task as soon as possible or reschedule it if necessary.
+Please complete this task as soon as possible or update its due date if needed.
 
 Best regards,
 StudyMate System
                             """
                             
-                            print(f"Sending overdue reminder #{overdue_reminder_count + 1} to {task_email}, frequency: {reminder_frequency}")
-                            success = send_email(task_email, subject, body)
-                            
-                            if success:
+                            if send_email(task_email, subject, body):
+                                logger.info(f"Sent overdue reminder ({reminder_frequency}) for task '{title}' to {task_email}")
+                                
+                                # Update task counters
                                 tasks_ref.document(task.id).update({
                                     "overdue_reminder_count": overdue_reminder_count + 1,
+                                    "reminder_count": reminder_count + 1,
                                     "last_reminder_time": now.isoformat()
                                 })
-                                print(f"✓ Overdue reminder sent for task: {title}")
                             else:
-                                print(f"✗ Failed to send overdue reminder for task: {title}")
-                        
-                        continue  # Skip the pre-due date reminders for overdue tasks
+                                logger.error(f"Failed to send overdue reminder for task '{title}' to {task_email}")
                     
-                    print(f"Task '{title}' - Due in {days_remaining:.2f} days ({hours_remaining:.2f} hours), Priority: {priority}")
-
-                    # Initialize variables to track if we should send a reminder
-                    should_send_reminder = False
-                    reminder_type = ""
-
-                    # ADJUSTED: Better timing for the 4 regular reminders, maximizing 24-hour coverage
-                    if 3.5 <= days_remaining <= 4.5 and reminder_count == 0:
-                        # First reminder ~4 days before due date
-                        should_send_reminder = True
-                        reminder_type = "4-day"
-                        max_reminders = 4
-                        days_text = "4"
-                    elif 2.5 <= days_remaining <= 3.5 and reminder_count <= 1:
-                        # Second reminder ~3 days before due date
-                        should_send_reminder = True
-                        reminder_type = "3-day"
-                        max_reminders = 4
-                        days_text = "3"
-                    elif 1.5 <= days_remaining <= 2.5 and reminder_count <= 2:
-                        # Third reminder ~2 days before due date
-                        should_send_reminder = True
-                        reminder_type = "2-day"
-                        max_reminders = 4
-                        days_text = "2"
-                    # IMPROVED: Full 24-hour coverage for 1-day reminder
-                    elif 0.5 <= days_remaining <= 1.5 and reminder_count <= 3:
-                        # Expanded window to better utilize full 24 hours
-                        should_send_reminder = True
-                        reminder_type = "1-day"
-                        max_reminders = 4
-                        days_text = "1"
-                    elif 0 <= days_remaining < 0.5 and 0 <= hours_remaining < 18:
-                        # Same day reminders - ADJUSTED: send 3 reminders with 50-minute gaps
-                        if same_day_reminder_count < 3:
-                            # MODIFIED: Check if enough time has passed since last reminder (50 minutes = 3000 seconds)
-                            if last_reminder_time is None or (now - last_reminder_time).total_seconds() >= 3000:
+                    # Task is not yet due - check if we need to send an upcoming reminder
+                    else:
+                        logger.debug(f"Task '{title}' has {days_remaining:.2f} days remaining")
+                        
+                        # Get time since last reminder
+                        time_since_last_reminder = float('inf')
+                        if last_reminder_time:
+                            time_since_last_reminder = (now - last_reminder_time).total_seconds() / 3600  # Hours
+                        
+                        # Determine if we should send a reminder based on priority and time remaining
+                        should_send_reminder = False
+                        reminder_type = None
+                        
+                        # Check for same-day reminders (tasks due today)
+                        if 0 <= days_remaining < 1:
+                            # Task is due today
+                            
+                            # Same day reminder schedule:
+                            # High priority: 6 hours before, 3 hours before, 1 hour before
+                            # Medium priority: 6 hours before, 1 hour before
+                            # Low priority: 3 hours before
+                            
+                            if priority == "high":
+                                if (6 <= hours_remaining < 7 and same_day_reminder_count == 0) or \
+                                   (3 <= hours_remaining < 4 and same_day_reminder_count == 1) or \
+                                   (1 <= hours_remaining < 2 and same_day_reminder_count == 2):
+                                    should_send_reminder = True
+                                    reminder_type = f"{int(hours_remaining)} hour"
+                            
+                            elif priority == "medium":
+                                if (6 <= hours_remaining < 7 and same_day_reminder_count == 0) or \
+                                   (1 <= hours_remaining < 2 and same_day_reminder_count == 1):
+                                    should_send_reminder = True
+                                    reminder_type = f"{int(hours_remaining)} hour"
+                            
+                            elif priority == "low":
+                                if 3 <= hours_remaining < 4 and same_day_reminder_count == 0:
+                                    should_send_reminder = True
+                                    reminder_type = f"{int(hours_remaining)} hour"
+                        
+                        # Check for advanced reminders
+                        # High priority: 7 days, 3 days, 1 day before
+                        # Medium priority: 5 days, 1 day before
+                        # Low priority: 3 days before
+                        elif priority == "high":
+                            if (7 <= days_remaining < 7.1 and reminder_count == 0) or \
+                               (3 <= days_remaining < 3.1 and reminder_count == 1) or \
+                               (1 <= days_remaining < 1.1 and reminder_count == 2):
                                 should_send_reminder = True
-                                reminder_type = "same-day"
-                                hours_minutes_remaining = ""
-                                
-                                if hours_remaining > 1:
-                                    hours_minutes_remaining = f"{int(hours_remaining)} hours"
-                                elif hours_remaining <= 1 and minutes_remaining > 0:
-                                    hours_minutes_remaining = f"{int(minutes_remaining)} minutes"
-                                else:
-                                    hours_minutes_remaining = "very little time"
-                                
-                                subject = f"URGENT: Task '{title}' is DUE TODAY!"
-                                body = f"""
-Hello {user_name},
-
-⚠️WARNING THIS IS AN URGENT REMINDER ⚠️
-
-Your {priority}-priority task is due TODAY:
-
-Task Title: {title}
-Subject: {data.get('subject', 'N/A')}
-Due: TODAY at {due_time_str}
-
-You only have {hours_minutes_remaining} remaining to complete this task!
-Please complete this task as soon as possible.
-
-Best regards,  
-StudyMate System
-                                """
-                                
-                                print(f"Sending same-day reminder {same_day_reminder_count + 1}/3 to {task_email}")
-                                success = send_email(task_email, subject, body)
-                                
-                                if success:
-                                    tasks_ref.document(task.id).update({
-                                        "same_day_reminder_count": same_day_reminder_count + 1,
-                                        "last_reminder_time": now.isoformat()
-                                    })
-                                    print(f"✓ Same-day reminder sent for task: {title}")
-                                else:
-                                    print(f"✗ Failed to send same-day reminder for task: {title}")
-                        continue  # Skip the rest of the loop for same-day reminders
-                    
-                    # Send regular reminders based on days remaining
-                    if should_send_reminder and reminder_type != "same-day":
-                        days_word = "days" if int(days_text) != 1 else "day"
-                        subject = f"REMINDER: {priority.upper()} priority task due in {days_text} {days_word}"
-                        body = f"""
-Hello {user_name},
-
-This is a reminder about your {priority}-priority task:
-
-Task Title: {title}
-Subject: {data.get('subject', 'N/A')}
-Due Date: {due_date_str}
-Time: {due_time_str}
-
-This task is due in {days_text} {days_word}. 
-This is reminder {reminder_count + 1} of {max_reminders} for this task.
-
-Please complete this task before the deadline.
-
-Best regards,  
-StudyMate System
-                        """
-
-                        print(f"Attempting to send {reminder_type} reminder to {task_email}")
-                        success = send_email(task_email, subject, body)
+                                reminder_type = f"{int(days_remaining)} day"
                         
-                        if success:
-                            tasks_ref.document(task.id).update({
-                                "reminder_count": reminder_count + 1,
-                                "last_reminder_time": now.isoformat()
-                            })
-                            print(f"✓ {reminder_type} reminder sent for task: {title}")
-                            # Add debug info for successful reminder
-                            print(f"Reminder details: type={reminder_type}, days_remaining={days_remaining:.2f}, hours_remaining={hours_remaining:.2f}")
-                        else:
-                            print(f"✗ Failed to send {reminder_type} reminder for task: {title}")
+                        elif priority == "medium":
+                            if (5 <= days_remaining < 5.1 and reminder_count == 0) or \
+                               (1 <= days_remaining < 1.1 and reminder_count == 1):
+                                should_send_reminder = True
+                                reminder_type = f"{int(days_remaining)} day"
+                        
+                        elif priority == "low":
+                            if 3 <= days_remaining < 3.1 and reminder_count == 0:
+                                should_send_reminder = True
+                                reminder_type = f"{int(days_remaining)} day"
+                        
+                        # Send reminder if conditions are met
+                        if should_send_reminder:
+                            logger.info(f"Sending {reminder_type} reminder for task '{title}'")
+                            
+                            subject = f"Reminder: {title} - Due in {reminder_type}"
+                            body = f"""
+Hello {user_name},
 
+This is a friendly reminder about your upcoming task:
+
+Task: {title}
+Subject: {data.get('subject', 'N/A')}
+Type: {data.get('type', 'N/A')}
+Due Date: {due_date_str} at {due_time_str}
+Priority: {priority}
+
+This task is due in {reminder_type}{"s" if int(float(reminder_type.split()[0])) > 1 else ""}.
+
+Best regards,
+StudyMate System
+                            """
+                            
+                            if send_email(task_email, subject, body):
+                                logger.info(f"Sent {reminder_type} reminder for task '{title}' to {task_email}")
+                                
+                                # Update task counters
+                                update_data = {
+                                    "reminder_count": reminder_count + 1,
+                                    "last_reminder_time": now.isoformat()
+                                }
+                                
+                                # Update same-day reminders if applicable
+                                if 0 <= days_remaining < 1:
+                                    update_data["same_day_reminder_count"] = same_day_reminder_count + 1
+                                
+                                tasks_ref.document(task.id).update(update_data)
+                            else:
+                                logger.error(f"Failed to send reminder for task '{title}' to {task_email}")
+                
                 except Exception as e:
-                    print(f"Error processing task {task.id}: {e}")
-                    import traceback
-                    traceback.print_exc()
-
+                    logger.error(f"Error processing reminders for task {task.id}: {e}")
+                    
     except Exception as e:
-        print(f"Error fetching users or tasks: {e}")
-        import traceback
-        traceback.print_exc()
-
-    print("Reminder check completed.")
-
+        logger.error(f"Error in reminder check: {e}")
+      
 # Initialize the scheduler
 def init_scheduler():
     """Initialize and start the background scheduler"""
     scheduler = BackgroundScheduler()
     # Schedule the check_reminders function to run every 5 minutes
-    scheduler.add_job(func=check_reminders, trigger="interval", minutes=25)
+    scheduler.add_job(func=check_reminders, trigger="interval", minutes=5)
     # Start the scheduler
     scheduler.start()
     logger.info("Scheduler started, running check_reminders every 5 minutes")
