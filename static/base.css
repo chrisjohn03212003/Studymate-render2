@@ -2,7 +2,7 @@
     --primary: #d416de;         /* Purple main color */
     --primary-dark: #4a0072;    /* Darker purple for hover effects */
     --primary-light: #761691;
-    --primary-black:#08000b;  /* Lighter purple for accents */
+    --primary-black:#08000b;    /* Lighter purple for accents */
     --accent: #e040fb;          /* Bright purple accent */
     --text-primary: #ffffff;    /* White text on dark backgrounds */
     --text-secondary: #f3e5f5;  /* Light purple text */
@@ -21,10 +21,10 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  font-size: 20px;
+  font-size: 18px;
+  margin: 0;
+  padding: 0;
 }
-
-
 
 /* Background and color classes */
 .bg-primary {
@@ -39,22 +39,30 @@ body {
 .btn-primary {
     background-color: var(--primary);
     border-color: var(--primary);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 /* Feature Icons */
 .feature-icon {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto;
+    margin: 0 auto 15px;
     background-color: var(--primary) !important;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 /* Step Circles */
@@ -64,10 +72,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto;
+    margin: 0 auto 15px;
     font-weight: bold;
     font-size: 1.5rem;
     background-color: var(--primary) !important;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 /* Avatar */
@@ -79,6 +89,7 @@ body {
     justify-content: center;
     font-weight: bold;
     background-color: var(--primary) !important;
+    border-radius: 50%;
 }
 
 /* Text colors */
@@ -134,9 +145,102 @@ body {
     padding-top: 60px; /* Make room for the logo container */
 }
 
+.hero-title {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Buttons container */
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+    flex-wrap: wrap;
+}
+
+/* Login and Register buttons */
+.login-btn, .register-btn {
+    min-width: 120px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 30px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Features section */
+.features-section {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background-color: var(--primary);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 25px 20px;
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.feature-title {
+    font-size: 1.4rem;
+    margin: 15px 0;
+    font-weight: 600;
+}
+
+.feature-description {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -153,79 +257,240 @@ body {
 }
 
 /* Media Queries */
-@media (max-width: 767.98px) {
-    .card-body {
-        padding: 1rem;
-    }
-    
-    .feature-icon, .step-circle {
-        width: 50px;
-        height: 50px;
-        font-size: 1.25rem;
-    }
-}
-
-/* Small mobile devices (portrait phones) */
 @media (max-width: 480px) {
-  body {
-    font-size: 16px;
-  }
-  
+  /* Logo adjustments */
   .logo-container {
+    position: relative;
     flex-direction: column;
     align-items: center;
+    padding-top: 10px;
+    padding-bottom: 0;
     gap: 10px;
-    top: 10px;
+  }
+  
+  .logo-container img {
+    width: 80px;
+    height: auto;
+  }
+
+  /* Hero section adjustments */
+  .hero-section-with-logos {
+    padding-top: 120px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .hero-title {
+    font-size: 1.6rem;
+    padding: 0 5px;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  
+  .hero-description {
+    font-size: 0.9rem;
+    padding: 0 10px;
+    line-height: 1.4;
+  }
+  
+  /* Button adjustments */
+  .buttons-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 15px;
+  }
+  
+  .login-btn, .register-btn {
+    width: 80%;
+    max-width: 200px;
+    padding: 10px 15px;
+    font-size: 0.95rem;
+  }
+  
+  /* Features section adjustments */
+  .features-section {
+    padding: 40px 15px;
+  }
+  
+  .section-title {
+    font-size: 1.4rem;
+    margin-bottom: 25px;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .feature-card {
+    padding: 15px;
+    margin-bottom: 12px;
+  }
+  
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+  
+  .feature-title {
+    font-size: 1.1rem;
+    margin: 10px 0;
+  }
+  
+  .feature-description {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  /* Improve text readability on gradient backgrounds */
+  body {
+    font-size: 15px;
+  }
+  
+  .text-secondary {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+}
+
+/* Small to medium devices (large phones and small tablets) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .logo-container {
+    justify-content: space-around;
     padding: 0 10px;
   }
   
   .logo-container img {
-    width: 130px;
-  }
-
-  .feature-icon, .step-circle {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .avatar {
-    width: 30px;
-    height: 30px;
+    width: 100px;
   }
   
   .hero-section-with-logos {
-    padding-top: 120px; /* Make more room for stacked logos */
+    padding-top: 85px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
   
-  .btn-primary, .btn-secondary {
-    padding: 0.5rem 1rem;
-    font-size: 14px;
+  .hero-title {
+    font-size: 2rem;
+    line-height: 1.3;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+    max-width: 95%;
+    line-height: 1.5;
+  }
+  
+  .buttons-container {
+    gap: 12px;
+  }
+  
+  .login-btn, .register-btn {
+    min-width: 100px;
+    padding: 10px 18px;
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .feature-card {
+    padding: 20px 15px;
+  }
+}
+
+/* Add a specific orientation adjustment for landscape phones */
+@media (max-width: 768px) and (orientation: landscape) {
+  .logo-container {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 30px;
+  }
+  
+  .hero-section-with-logos {
+    padding-top: 70px;
+  }
+  
+  .buttons-container {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+/* Common tweaks for better mobile performance */
+@media (max-width: 768px) {
+  /* Optimize animations for better performance on mobile */
+  @keyframes logoPulse {
+    0% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 5px rgba(42, 48, 48, 0.7));
+    }
+    100% {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 8px rgba(0, 225, 255, 0.6));
+    }
+  }
+  
+  /* Improve touch targets for better usability */
+  button, .login-btn, .register-btn, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion) {
+    .logo-container img {
+      animation: none;
+    }
+    
+    .feature-card:hover {
+      transform: none;
+    }
   }
 }
 
 /* Medium devices (tablets) */
 @media (min-width: 481px) and (max-width: 768px) {
   body {
-    font-size: 18px;
+    font-size: 17px;
   }
   
   .logo-container {
-    padding: 0 15px;
+    justify-content: center;
   }
   
   .logo-container img {
-    width: 150px;
+    width: 110px;
   }
   
   .hero-section-with-logos {
-    padding-top: 70px;
+    padding-top: 100px;
+  }
+  
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .buttons-container {
+    flex-wrap: wrap;
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
 
 /* Large devices (desktops) */
 @media (min-width: 769px) and (max-width: 1024px) {
   .logo-container img {
-    width: 170px;
+    width: 140px;
+  }
+  
+  .hero-title {
+    font-size: 2.8rem;
   }
 }
 
@@ -234,6 +499,14 @@ body {
   .container {
     max-width: 1200px;
     margin: 0 auto;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .logo-container img {
+    width: 150px;
   }
 }
 
