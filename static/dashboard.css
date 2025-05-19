@@ -972,17 +972,210 @@ body::after {
 
 /* Small mobile devices (portrait phones) */
 @media (max-width: 480px) {
-  body {
-    font-size: 16px;
+  /* Logo positioning for small screens */
+  .logo-container {
+    position: relative;
+    top: 10px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    padding-bottom: 10px;
   }
   
-  .container {
+  .logo-container img {
+    width: 100px; /* Smaller logo size for mobile */
+    height: auto;
+  }
+  
+  /* Dashboard title */
+  h1.welcome-title {
+    font-size: 24px;
+    margin-top: 60px; /* Make room for repositioned logo */
+    padding-bottom: 5px;
+  }
+  
+  /* Button styling for mobile */
+  .button-row {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 0 15px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  /* Calendar specific mobile fixes */
+  .calendar {
+    min-height: 350px;
+    padding: 10px;
+    margin-bottom: 30px;
+  }
+  
+  /* Fix calendar header buttons & title */
+  .fc .fc-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    padding-bottom: 10px;
+  }
+  
+  .fc .fc-toolbar-title {
+    font-size: 1rem;
+    text-align: center;
+    margin: 0;
+    order: 2;
+  }
+  
+  .fc .fc-toolbar-chunk:first-child {
+    order: 1;
+    margin-bottom: 5px;
+  }
+  
+  .fc .fc-toolbar-chunk:last-child {
+    order: 3;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+  }
+  
+  /* View options for calendar (month/week/day) */
+  .fc-button-group {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .fc .fc-button {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+  
+  /* Calendar cells */
+  .fc-daygrid-day {
+    min-height: 40px;
+  }
+  
+  .fc-scrollgrid-sync-table {
+    min-height: 250px;
+  }
+  
+  /* Fix day numbers */
+  .fc-daygrid-day-number {
+    font-size: 0.8rem;
+    padding: 2px;
+  }
+  
+  /* Calendar event spacing */
+  .fc-daygrid-event {
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding: 1px 3px;
+    font-size: 0.7rem;
+  }
+  
+  /* Fix form layout for mobile */
+  form {
+    padding: 15px;
+    max-height: none; /* Remove max-height restriction on mobile */
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px; /* Prevents iOS zoom on input focus */
+    padding: 10px 10px 10px 35px;
+  }
+  
+  /* Adjust task list for mobile */
+  .task-list-container {
+    margin-bottom: 20px;
+    overflow: auto;
+  }
+  
+  .task-list-header {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    font-size: 0.8rem;
     padding: 10px;
   }
   
+  .task-item {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+  
+  /* Hide certain columns on mobile */
+  .task-header-details,
+  .task-details,
+  .task-header-date,
+  .task-date {
+    display: none;
+  }
+  
+  /* Fix task action buttons size and positioning */
+  .task-actions {
+    justify-content: flex-end;
+  }
+  
+  .action-btn {
+    padding: 3px 6px;
+    font-size: 0.7rem;
+  }
+  
+  /* User info display on mobile */
+  .user-info-display {
+    padding: 15px;
+  }
+  
+  .user-data-row {
+    margin-bottom: 15px;
+  }
+  
+  .user-data-row label {
+    font-size: 0.9rem;
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  
+  .user-data-row span {
+    font-size: 1rem;
+    padding-left: 15px;
+  }
+  
+  /* Fix footer for mobile */
+  .footer {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    margin-top: 20px;
+    font-size: 0.8rem;
+    text-align: center;
+    width: 100%;
+  }
+}
+
+/* Small devices (large phones, 481px and up) */
+@media (min-width: 481px) and (max-width: 767px) {
+  /* Logo adjustments */
   .logo-container {
-    flex-direction: column;
-    align-items: flex-start;
+    position: relative;
+    top: 10px;
+    left: 10px;
     gap: 10px;
   }
   
@@ -990,194 +1183,242 @@ body::after {
     width: 120px;
   }
   
+  /* Dashboard title */
   h1.welcome-title {
     font-size: 28px;
-    margin-bottom: 20px;
+    margin-top: 80px; /* Make room for logo */
   }
   
-  h2 {
-    font-size: 22px;
-  }
-  
-  .footer {
-    font-size: 14px;
-    bottom: 5px;
-    left: 10px;
-  }
-  
+  /* Button adjustments */
   .button-row {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 10px;
+    margin: 0 auto 20px;
+    max-width: 450px;
   }
   
   button {
-    padding: 0.6rem 1.2rem;
-    font-size: 16px;
-  }
-  
-  .task-list-header,
-  .task-item {
-    grid-template-columns: 1fr;
-    text-align: center;
-    padding: 10px;
-    font-size: 16px;
-  }
-  
-  .task-header-date,
-  .task-date,
-  .task-header-details,
-  .task-details {
-    display: none;
-  }
-  
-  .task-actions {
-    justify-content: center;
-    margin-top: 10px;
-    gap: 5px;
-  }
-  
-  .badge {
-    padding: 5px 8px;
-    font-size: 0.75rem;
-  }
-  
-  .user-info-display {
-    padding: 15px;
-  }
-  
-  .user-data-row {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 15px;
-  }
-  
-  .user-data-row label {
-    width: 100%;
-    margin-bottom: 5px;
-    font-size: 16px;
-  }
-  
-  .user-data-row span {
-    font-size: 18px;
-    padding-left: 20px;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group text {
-    padding: 10px 10px 10px 35px;
+    flex: 1 1 200px;
+    max-width: 200px;
     font-size: 0.9rem;
   }
   
-  .filter-form {
-    flex-direction: column;
-    padding: 8px;
-  }
-  
-  .filter-buttons {
-    margin-left: 0;
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  /* Calendar adjustments for mobile */
+  /* Calendar specific tablet fixes */
   .calendar {
     min-height: 400px;
-    padding: 10px;
+    padding: 15px;
   }
   
   .fc .fc-toolbar-title {
     font-size: 1.2rem;
   }
   
-  .fc .fc-toolbar {
-    flex-direction: column;
-    gap: 10px;
-  }
-}
-
-/* Medium devices (tablets) */
-@media (min-width: 481px) and (max-width: 768px) {
-  .container {
-    padding: 15px;
-  }
-  
-  h1.welcome-title {
-    font-size: 32px;
-  }
-  
+  /* Task list adjustments */
   .task-list-header,
   .task-item {
-    grid-template-columns: 1fr 1fr;
-    font-size: 18px;
+    grid-template-columns: 2fr 1fr 1fr;
   }
   
   .task-header-details,
   .task-details {
     display: none;
   }
-  
-  .user-data-row label {
-    width: 130px;
-    font-size: 18px;
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Logo positioning for tablets */
+  .logo-container {
+    top: 15px;
+    left: 15px;
   }
   
-  .user-data-row span {
-    font-size: 20px;
+  .logo-container img {
+    width: 140px;
   }
   
-  .button-row {
-    flex-wrap: wrap;
-    gap: 10px;
+  /* Dashboard title */
+  h1.welcome-title {
+    font-size: 32px;
+    margin-top: 30px;
   }
   
+  /* Calendar dimensions for tablets */
   .calendar {
     min-height: 500px;
   }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
 }
 
-/* Large devices (desktops) */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .container {
-    padding: 20px;
+/* Additional fixes for orientation changes */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Handle landscape mode on phones */
+  .logo-container {
+    position: relative;
+    top: 5px;
+    left: 5px;
   }
   
-  .task-list-header,
-  .task-item {
-    grid-template-columns: 2fr 1.5fr 1fr 1fr;
+  .logo-container img {
+    width: 80px;
+    height: auto;
+  }
+  
+  h1.welcome-title {
+    font-size: 22px;
+    margin-top: 10px;
+    margin-bottom: 15px;
   }
   
   .button-row {
-    justify-content: space-between;
-  }
-}
-
-/* Extra large devices (large desktops) */
-@media (min-width: 1025px) {
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
+    margin-bottom: 15px;
   }
   
-  .task-list-header,
-  .task-item {
-    grid-template-columns: 2fr 2fr 1fr 1fr;
+  button {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+  
+  /* Compact calendar for landscape */
+  .calendar {
+    min-height: 300px;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  
+  /* Ensure proper scrolling in landscape */
+  body {
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  /* Compact forms */
+  form {
+    padding: 10px;
+  }
+  
+  .form-group {
+    margin-bottom: 10px;
   }
 }
 
-/* Improved orientation changes */
-@media (orientation: portrait) and (max-width: 768px) {
-  .button-row button {
+/* Fix for iPhone X and newer (handling the notch) */
+@supports (padding: max(0px)) {
+  .container, 
+  .logo-container,
+  .footer {
+    padding-left: max(15px, env(safe-area-inset-left));
+    padding-right: max(15px, env(safe-area-inset-right));
+  }
+  
+  .footer {
+    padding-bottom: max(15px, env(safe-area-inset-bottom));
+  }
+}
+
+/* === Critical Fixes for Calendar in Mobile View === */
+@media (max-width: 767px) {
+  /* Calendar navigation buttons */
+  .fc .fc-prev-button,
+  .fc .fc-next-button,
+  .fc .fc-today-button {
+    width: auto;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+  
+  /* View buttons (month/week/day) */
+  .fc-button-group {
+    display: flex;
     width: 100%;
   }
   
-  .calendar {
-    margin-top: 20px;
+  .fc-button-group button {
+    flex: 1;
+    padding: 5px 2px;
+    font-size: 0.75rem;
+    min-width: 0;
+  }
+  
+  /* Make calendar cells more usable on mobile */
+  .fc-scrollgrid-sync-inner {
+    min-height: 30px;
+  }
+  
+  /* Hide week numbers if present */
+  .fc-timegrid-axis,
+  .fc-daygrid-week-number {
+    display: none;
+  }
+  
+  /* Ensure events are visible but compact */
+  .fc-event {
+    padding: 2px;
+    font-size: 0.65rem;
+  }
+  
+  /* Make sure "today" highlight is visible */
+  .fc-day-today {
+    background-color: rgba(5, 217, 232, 0.2) !important;
+  }
+}
+
+/* === Enhancement for the Specific Calendar View in Screenshot === */
+@media (max-width: 480px) {
+  /* Targeted fix for the calendar view buttons */
+  .calendar .fc-button-group {
+    display: flex;
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 300px;
+  }
+  
+  .calendar .fc-button-group button {
+    flex: 1;
+    border-radius: 0;
+    background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+    border: none;
+    padding: 8px 0;
+    font-size: 0.8rem;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .calendar .fc-button-active {
+    background: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  /* Week view specific styles (match the screenshot) */
+  .fc-timeGridWeek-view .fc-col-header-cell {
+    padding: 2px;
+  }
+  
+  .fc-timeGridWeek-view .fc-col-header-cell-cushion {
+    font-size: 0.7rem;
+    padding: 2px;
+  }
+  
+  /* Time column */
+  .fc-timegrid-slot-label {
+    font-size: 0.7rem;
+    padding: 0 2px;
+  }
+  
+  /* Today navigation button */
+  .fc-today-button {
+    background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)) !important;
+    border: none !important;
+    opacity: 1 !important;
+    font-weight: bold !important;
+  }
+  
+  /* Fix the navigation arrows */
+  .fc-prev-button, .fc-next-button {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border: 1px solid var(--neon-blue) !important;
   }
 }
 
