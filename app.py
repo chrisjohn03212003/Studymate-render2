@@ -536,6 +536,82 @@ StudyMate System
     
     return redirect(url_for("dashboard"))
 
+@app.route("/delete_user", methods=["POST"])
+def delete_user():
+    """Delete a user account and all associated tasks"""
+    if "user" not in session:
+        return redirect(url_for("login"))
+    
+    user_id = session["user"]
+    
+    try:
+        # Get user info for confirmation email before deletion
+        user_doc = db.collection("users").document(user_id).get()
+        if not user_doc.exists:
+            logger.error(f"User {user_id} not found during deletion attempt")
+            return "User not found", 404
+        
+        user_data = user_doc.to_dict()
+        user_email = user_data.get("gmail", "")
+        user_name = user_data.get("name", "")
+        
+        # Start a transaction for atomically deleting user data
+        transaction = db.transaction()
+        
+        @firestore.transactional
+        def delete_user_in_transaction(transaction, uid, email, name):
+            # Get all tasks for the user
+            tasks_ref = db.collection("users").document(uid).collection("tasks")
+            tasks = tasks_ref.stream()
+            
+            # Delete all tasks
+            for task in tasks:
+                transaction.delete(tasks_ref.document(task.id))
+                logger.info(f"Deleted task {task.id} for user {uid}")
+            
+            # Delete user document
+            transaction.delete(db.collection("users").document(uid))
+            logger.info(f"Deleted user document for {uid}")
+            
+            # Clear session
+            session.pop("user", None)
+            
+            # Send confirmation email
+            if email and validate_email(email):
+                subject = "Your StudyMate Account Has Been Deleted"
+                body = f"""
+Hello {name},
+
+Your StudyMate account has been successfully deleted as requested.
+All your account information and tasks have been permanently removed from our system.
+
+If you didn't request this action or have any questions, please contact us.
+
+Thank you for using StudyMate!
+
+Best regards,
+StudyMate System
+                """
+                
+                send_email(email, subject, body)
+                logger.info(f"Account deletion confirmation email sent to {email}")
+            
+            return True
+        
+        # Execute transaction
+        success = delete_user_in_transaction(transaction, user_id, user_email, user_name)
+        
+        if not success:
+            logger.error(f"Failed to delete user {user_id}")
+            return "Failed to delete account", 500
+        
+        # Redirect to base page
+        return redirect(url_for("base"))
+        
+    except Exception as e:
+        logger.error(f"Error deleting user {user_id}: {e}")
+        return "An error occurred while deleting account", 500
+
 @app.route("/delete_task/<task_id>")
 def delete_task(task_id):
     if "user" not in session:
