@@ -411,252 +411,102 @@ p {
   }
 }
 
-/* Enhanced Mobile Responsive CSS for StudyMate */
-
-/* General mobile adjustments for all small screens */
+/* Responsive Design */
 @media (max-width: 768px) {
-  body {
-    padding: 0;
-    align-items: flex-start;
-    padding-top: 20px;
-    background-position: center top;
+  .login_container,.register_container {
+    width: 90%;
+    padding: 1.5rem;
   }
   
   .logo-container {
-    position: relative;
-    top: 0;
-    left: 0;
-    width: 100%;
-    justify-content: center;
-    margin-bottom: 15px;
+    top: 10px;
+    left: 10px;
   }
   
   .logo-container img {
     width: 100px;
-    height: auto;
   }
   
-  .login_container,
-  .register_container {
-    width: 85%;
-    max-width: none;
-    padding: 1.5rem;
-    margin: 15px auto;
-    border-radius: 15px;
-  }
-  
-  h1.welcome-title {
-    font-size: 28px;
-    margin-bottom: 15px;
+  h1 {
+    font-size: 32px;
   }
   
   h2 {
-    font-size: 22px;
-    margin-bottom: 15px;
-  }
-  
-  form {
-    padding: 20px 15px;
-    width: 100%;
-  }
-  
-  .input-group {
-    width: 100%;
-    margin-bottom: 12px;
-  }
-  
-  input[type="text"],
-  input[type="password"],
-  input[type="email"],
-  input[type="number"],
-  input[type="date"],
-  input[type="time"],
-  select {
-    padding: 0.8rem 1rem 0.8rem 40px;
-    font-size: 16px;
-    border-radius: 15px;
-  }
-  
-  button {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    font-size: 16px;
-    margin: 10px 0;
-  }
-  
-  .footer {
-    font-size: 14px;
-    position: relative;
-    margin-top: 15px;
-    width: 100%;
-    text-align: center;
-    left: 0;
-  }
-}
-
-/* Smaller mobile devices (narrow screens) */
-@media (max-width: 380px) {
-  .login_container,
-  .register_container {
-    width: 92%;
-    padding: 1rem;
-    margin: 10px auto;
-  }
-  
-  h1.welcome-title {
     font-size: 24px;
-    margin-bottom: 10px;
-  }
-  
-  h2 {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-  
-  .input-group {
-    margin-bottom: 10px;
-  }
-  
-  .input-group .icon {
-    left: 12px;
-    font-size: 16px;
-  }
-  
-  input[type="text"],
-  input[type="password"],
-  input[type="email"],
-  input[type="number"],
-  input[type="date"],
-  input[type="time"],
-  select {
-    padding: 0.7rem 1rem 0.7rem 35px;
-    font-size: 15px;
-  }
-  
-  button {
-    padding: 0.7rem;
-    font-size: 15px;
   }
 }
 
-/* Very small mobile devices */
-@media (max-width: 320px) {
-  .logo-container img {
-    width: 80px;
-  }
-  
-  .login_container,
-  .register_container {
-    width: 95%;
-    padding: 0.8rem;
-  }
-  
-  h1.welcome-title {
-    font-size: 22px;
-  }
-  
-  form {
-    padding: 15px 10px;
-  }
-  
-  input[type="text"],
-  input[type="password"],
-  input[type="email"],
-  input[type="number"],
-  input[type="date"],
-  input[type="time"],
-  select {
-    padding: 0.6rem 1rem 0.6rem 30px;
-    font-size: 14px;
-  }
-}
-
-/* Specific fixes for StudyMate forms */
-@media (max-width: 768px) {
-  /* Fix for form container in mobile */
-  .register_container, .login_container {
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.7);
-    height: auto;
-    overflow: visible;
-    max-height: none;
-  }
-  
-  /* Better spacing for "Already registered?" or "Don't have an account?" text */
-  form + p {
-    margin-top: 10px;
-    margin-bottom: 20px;
-    font-size: 14px;
-  }
-  
-  /* Center logos on small screens */
-  .logo-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-}
-
-/* Fix for the visible author name at the bottom */
-@media (max-width: 768px) {
-  .footer {
-    bottom: 0;
-    position: relative;
-    margin-top: 10px;
-    width: 100%;
-    text-align: center;
-    left: 0;
-  }
-}
-
-/* Landscape orientation fixes */
-@media (max-height: 500px) and (orientation: landscape) {
+/* Small mobile devices (portrait phones) */
+@media (max-width: 480px) {
   body {
+    padding: 10px;
     align-items: flex-start;
-    padding-top: 10px;
-    height: auto;
-    min-height: 100vh;
-  }
-  
-  .login_container,
-  .register_container {
-    margin: 60px auto 20px auto;
-    transform: none;
-    width: 70%;
-    max-height: none;
+    padding-top: 60px;
   }
   
   .logo-container {
-    position: absolute;
+    flex-direction: column;
+    gap: 10px;
     top: 10px;
-    justify-content: center;
-    width: 100%;
+    left: 10px;
   }
   
-  form {
-    padding: 15px;
-    margin-bottom: 10px;
+  .logo-container img {
+    width: 100px;
   }
   
-  .input-group {
-    margin-bottom: 8px;
+  .login_container {
+    max-width: 100%;
+    padding: 1.5rem;
+    margin: 0 10px;
+  }
+  
+  .register_container {
+    max-width: 100%;
+    padding: 1.2rem;
+    margin: 0 10px;
   }
   
   h1.welcome-title {
-    font-size: 24px;
-    margin-bottom: 10px;
+    font-size: 26px;
+    margin-bottom: 20px;
   }
   
   h2 {
     font-size: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
   }
-}
-
-/* Fix for StudyMate registration form */
-@media (max-width: 768px) {
-  .register_container {
-    height: auto;
-    padding-bottom: 20px;
+  
+  .input-group {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select {
+    padding: 0.8rem 2rem 0.8rem 40px;
+    font-size: 15px;
+  }
+  
+  button {
+    padding: 0.7rem 1.5rem;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  .footer {
+    font-size: 14px;
+    bottom: 5px;
+    left: 10px;
+  }
+  
+  form {
+    padding: 20px;
   }
 }
 
