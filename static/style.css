@@ -444,15 +444,18 @@ p {
     padding-top: 60px;
   }
   
-  .logo-container {
-    flex-direction: column;
+   .logo-container {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 0;
     gap: 10px;
-    top: 10px;
-    left: 10px;
   }
   
   .logo-container img {
-    width: 100px;
+    width: 80px;
+    height: auto;
   }
   
   .login_container {
