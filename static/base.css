@@ -261,7 +261,7 @@ body {
   /* Logo adjustments */
   .logo-container {
     position: relative;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     padding-top: 10px;
     padding-bottom: 0;
