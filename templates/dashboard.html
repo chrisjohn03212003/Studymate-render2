@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StudyMate</title>
+  <title>StudyMate Dashboard</title>
   <!-- Include all required FullCalendar packages -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
@@ -157,6 +157,7 @@
         </div>
       </div>
       <button id="edit-user-info-btn" class="btn-primary"><i class="fas fa-edit"></i> Edit Information</button>
+     
       
       <!-- User Info Edit Form (Initially Hidden) -->
       <form id="user-edit-form" action="/update_user" method="POST" style="display: none;">
@@ -179,6 +180,7 @@
         <div class="button-row">
           <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Changes</button>
           <button type="button" id="cancel-user-edit-btn" class="btn-secondary"><i class="fas fa-times"></i> Cancel</button>
+          <button type="button" id="delete-user-btn" class="btn-danger"><i class="fas fa-trash"></i> Delete Account</button>
         </div>
       </form>
     </div>
@@ -1144,6 +1146,26 @@ if (editTypeSelect && editSubjectField) {
       calendar.updateSize();
     }
   });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  const deleteUserBtn = document.getElementById('delete-user-btn');
+  
+  if (deleteUserBtn) {
+    deleteUserBtn.addEventListener('click', function() {
+      // Show confirmation dialog
+      const confirmDelete = confirm("WARNING: This action cannot be undone. All your tasks and account information will be permanently deleted. Are you sure you want to delete your account?");
+      
+      if (confirmDelete) {
+        // If user confirms, submit the delete request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/delete_user';
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  }
 });
 
 </script>
