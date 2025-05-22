@@ -434,14 +434,14 @@ p {
   }
   
   .footer {
-    position: fixed;
-    font-size: 14px;
-    bottom: 10px;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    margin-top: 20px;
+    font-size: 0.8rem;
+    text-align: center;
+    width: 100%;
   }
-  .footer span {
-  position: relative;
-  display: inline-block;
-}
 }
 
 /* Very small mobile devices */
