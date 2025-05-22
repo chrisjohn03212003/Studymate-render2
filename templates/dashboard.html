@@ -272,7 +272,7 @@
   </div>
 
   <div class="footer">
-    <span>JOHN CHRIS BERNAL SANCHEZ</span>
+    <span>DEVELOP BY: JOHN CHRIS BERNAL SANCHEZ</span>
   </div>
 
 <script>
@@ -357,351 +357,245 @@ document.addEventListener("DOMContentLoaded", function() {
     
     console.log("All sections hidden");
   }
-// REPLACEMENT FOR ENTIRE showCalendar FUNCTION
+
+  // IMPROVED showCalendar function with better error handling
 function showCalendar() {
-  // Make sure calendar container is visible
   if (calendarEl) {
-    console.log("Showing calendar");
+    console.log("🗓️ Showing calendar");
     makeVisible(calendarEl);
-    
-    // Set explicit height for calendar container
     calendarEl.style.height = "600px";
-    
-    // Force layout recalculation
     void calendarEl.offsetHeight;
     
-    // Destroy existing calendar if any
+    // Destroy existing calendar
     if (calendar) {
       calendar.destroy();
     }
     
-    // Fetch tasks
+    // Fetch tasks from server
     fetch('/get_tasks')
       .then(response => {
-        if (!response.ok) throw new Error('Failed to load tasks');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         return response.json();
       })
-      .then(rawData => {
-        console.log("Raw task data:", rawData);
+      .then(events => {
+        console.log("📊 Raw events from server:", events);
         
-        // Create properly formatted events from raw data
-        const events = rawData.map(task => {
-          // Process the date
-          const dateStr = task.due || (task.start ? task.start.split('T')[0] : null);
-          if (!dateStr) {
-            console.error("No valid date found for task:", task);
-            return null;
+        // Validate and clean events
+        const validEvents = events.filter(event => {
+          if (!event.title || !event.start) {
+            console.warn("⚠️ Invalid event filtered out:", event);
+            return false;
           }
-          
-          // Extract time information
-          const timeStr = task.time || task.extendedProps?.time;
-          console.log(`Processing task: ${task.title}, Date: ${dateStr}, Time: ${timeStr}`);
-          
-          // If no time specified, create all-day event
-          if (!timeStr || timeStr.trim() === '') {
-            console.log(`Creating all-day event for: ${task.title}`);
-            return {
-              id: task.id,
-              title: task.title,
-              start: dateStr,
-              allDay: true,
-              backgroundColor: getEventColor(task.priority || task.extendedProps?.priority),
-              borderColor: getEventColor(task.priority || task.extendedProps?.priority),
-              textColor: '#ffffff',
-              extendedProps: {
-                priority: task.priority || task.extendedProps?.priority || 'low',
-                type: task.type || task.extendedProps?.type || '',
-                subject: task.subject || task.extendedProps?.subject || ''
-              }
-            };
-          }
-          
-          // Parse the time properly for timed events
-          let hours = 0;
-          let minutes = 0;
-          
-          // Try to parse 12-hour format first (e.g., "3:00 PM")
-          const amPmMatch = timeStr.match(/(\d+):(\d+)\s*([AP]M)/i);
-          if (amPmMatch) {
-            hours = parseInt(amPmMatch[1]);
-            minutes = parseInt(amPmMatch[2]);
-            const ampm = amPmMatch[3].toUpperCase();
-            
-            if (ampm === 'PM' && hours < 12) hours += 12;
-            if (ampm === 'AM' && hours === 12) hours = 0;
-            
-            console.log(`Parsed 12-hour time: ${hours}:${minutes} from ${timeStr}`);
-          } else {
-            // Try 24-hour format (e.g., "15:00")
-            const militaryMatch = timeStr.match(/(\d+):(\d+)/);
-            if (militaryMatch) {
-              hours = parseInt(militaryMatch[1]);
-              minutes = parseInt(militaryMatch[2]);
-              console.log(`Parsed 24-hour time: ${hours}:${minutes} from ${timeStr}`);
-            } else {
-              console.warn("Could not parse time format:", timeStr);
-              // If we can't parse the time, default to all-day event
-              return {
-                id: task.id,
-                title: task.title,
-                start: dateStr,
-                allDay: true,
-                backgroundColor: getEventColor(task.priority || task.extendedProps?.priority),
-                borderColor: getEventColor(task.priority || task.extendedProps?.priority),
-                textColor: '#ffffff',
-                extendedProps: {
-                  priority: task.priority || task.extendedProps?.priority || 'low',
-                  type: task.type || task.extendedProps?.type || '',
-                  subject: task.subject || task.extendedProps?.subject || '',
-                  time: timeStr
-                }
-              };
-            }
-          }
-          
-          // Create proper ISO timestamp for start time
-          const startDateTime = new Date(dateStr);
-          startDateTime.setHours(hours, minutes, 0, 0);
-          
-          // Create end time (1 hour later by default)
-          const endDateTime = new Date(startDateTime);
-          endDateTime.setHours(startDateTime.getHours() + 1);
-          
-          console.log(`Creating timed event: ${task.title} at ${startDateTime.toISOString()}, allDay: false`);
-          
-          // Return timed event with proper format
-          return {
-            id: task.id,
-            title: task.title,
-            start: startDateTime.toISOString(),
-            end: endDateTime.toISOString(),
-            allDay: false, // CRITICAL: must be false for timed events
-            backgroundColor: getEventColor(task.priority || task.extendedProps?.priority),
-            borderColor: getEventColor(task.priority || task.extendedProps?.priority),
-            textColor: '#ffffff',
-            extendedProps: {
-              priority: task.priority || task.extendedProps?.priority || 'low',
-              type: task.type || task.extendedProps?.type || '',
-              subject: task.subject || task.extendedProps?.subject || '',
-              time: timeStr // Keep original time string for display
-            }
-          };
-        }).filter(event => event !== null);
-        
-        console.log("Formatted events:", events);
-        
-        // Initialize calendar with better defaults for time display
-        calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'timeGridWeek', // Start with week view to see time slots better
-          headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          },
-          height: 'auto',
-          aspectRatio: 1.35,
-          themeSystem: 'standard',
-          editable: false,
-          selectable: true,
-          events: events,
-          displayEventTime: true, // Ensure event time is displayed
-          displayEventEnd: true, // Display end time too
-          eventTimeFormat: { // Format for time display
-            hour: 'numeric',
-            minute: '2-digit',
-            meridiem: 'short'
-          },
-          
-          // View-specific options
-          views: {
-            timeGridWeek: {
-              slotMinTime: '06:00:00',
-              slotMaxTime: '22:00:00',
-              nowIndicator: true,
-              slotEventOverlap: false,
-              slotDuration: '00:30:00'
-            },
-            timeGridDay: {
-              slotMinTime: '06:00:00',
-              slotMaxTime: '22:00:00',
-              nowIndicator: true,
-              slotEventOverlap: false,
-              slotDuration: '00:30:00'
-            }
-          },
-          
-          eventDidMount: function(info) {
-            // Create tooltip with event details
-            const tooltip = document.createElement('div');
-            tooltip.classList.add('task-tooltip');
-            
-            // Format tooltip based on view type
-            const viewType = info.view.type;
-            
-            let tooltipContent = `
-              <strong>${info.event.title}</strong><br>
-              Priority: ${info.event.extendedProps.priority || 'N/A'}<br>
-            `;
-            
-            if (viewType === 'dayGridMonth') {
-              tooltipContent += `Due: ${info.event.extendedProps.time ? 
-                new Date(info.event.start).toLocaleDateString() + ' ' + info.event.extendedProps.time : 
-                new Date(info.event.start).toLocaleDateString()}`;
-            } else {
-              tooltipContent += `Type: ${info.event.extendedProps.type || 'N/A'}`;
-              if (info.event.extendedProps.subject) {
-                tooltipContent += `<br>Subject: ${info.event.extendedProps.subject}`;
-              }
-            }
-            
-            tooltip.innerHTML = tooltipContent;
-            info.el.appendChild(tooltip);
-            
-            // Show/hide tooltip on hover
-            info.el.addEventListener('mouseover', function() {
-              tooltip.style.display = 'block';
-            });
-            info.el.addEventListener('mouseout', function() {
-              tooltip.style.display = 'none';
-            });
-            
-            // Debug event rendering
-            console.log(`Event mounted: "${info.event.title}", allDay: ${info.event.allDay}, start: ${info.event.start}`);
-            
-            // Apply custom styling
-            if (viewType.includes('timeGrid')) {
-              info.el.style.minHeight = '25px';
-              info.el.style.fontSize = '0.85em';
-              info.el.style.zIndex = '5';
-              
-              // Make sure timed events are clearly visible with border and padding
-              if (!info.event.allDay) {
-                info.el.style.border = '2px solid ' + info.event.borderColor;
-                info.el.style.padding = '2px 4px';
-                info.el.style.fontWeight = 'bold';
-              }
-            }
-            
-            // Apply color based on priority
-            info.el.style.backgroundColor = getEventColor(info.event.extendedProps.priority);
-          },
-          
-          eventClick: function(info) {
-            // Show task details on click
-            let alertText = `Task: ${info.event.title}
-Priority: ${info.event.extendedProps.priority || 'N/A'}
-Type: ${info.event.extendedProps.type || 'N/A'}`;
-
-            if (info.event.extendedProps.subject) {
-              alertText += `\nSubject: ${info.event.extendedProps.subject}`;
-            }
-            
-            const formattedTime = info.event.extendedProps.time || 
-                                 (info.event.allDay ? 'All day' : 
-                                  new Date(info.event.start).toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'}));
-            
-            alertText += `\nDue: ${new Date(info.event.start).toLocaleDateString()} ${formattedTime}`;
-            
-            alert(alertText);
-          }
+          return true;
         });
         
-        console.log("Rendering calendar...");
-        calendar.render();
-        console.log("Calendar rendered successfully");
+        console.log(`✅ ${validEvents.length} valid events loaded`);
         
-        // Force calendar to update size after rendering
-        setTimeout(() => {
-          if (calendar) {
-            calendar.updateSize();
-            console.log("Calendar size updated");
-          }
-        }, 300);
+        // Initialize calendar with events
+        initializeCalendar(validEvents);
       })
       .catch(error => {
-        console.error("Error initializing calendar:", error);
-        alert('Failed to load calendar data. Please try again.');
+        console.error("❌ Error loading calendar:", error);
+        alert('⚠️ Failed to load calendar data. Please refresh and try again.');
+        
+        // Initialize empty calendar as fallback
+        initializeCalendar([]);
       });
+  }
+}
+
+// SIMPLIFIED calendar initialization
+function initializeCalendar(events) {
+  console.log("🗓️ Initializing calendar with", events.length, "events");
+  
+  calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'timeGridWeek',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    height: 'auto',
+    aspectRatio: 1.35,
+    themeSystem: 'standard',
+    editable: false,
+    selectable: true,
+    events: events,
+    
+    // TIME DISPLAY SETTINGS - CRITICAL FOR SHOWING TIMES
+    displayEventTime: true,
+    displayEventEnd: false,
+    eventTimeFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      meridiem: 'short'
+    },
+    
+    // VIEW-SPECIFIC SETTINGS
+    views: {
+      timeGridWeek: {
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00',
+        nowIndicator: true,
+        slotEventOverlap: false,
+        slotDuration: '00:30:00',
+        allDaySlot: true,
+        allDayText: 'All Day'
+      },
+      timeGridDay: {
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00',
+        nowIndicator: true,
+        slotEventOverlap: false,
+        slotDuration: '00:30:00',
+        allDaySlot: true,
+        allDayText: 'All Day'
+      },
+      dayGridMonth: {
+        displayEventTime: true,
+        eventDisplay: 'block'
+      }
+    },
+    
+    // EVENT RENDERING
+    eventDidMount: function(info) {
+      console.log(`📌 Mounting event: "${info.event.title}"`);
+      console.log(`   - Start: ${info.event.start}`);
+      console.log(`   - All Day: ${info.event.allDay}`);
+      
+      // Create tooltip
+      const tooltip = createEventTooltip(info.event);
+      info.el.appendChild(tooltip);
+      
+      // Show/hide tooltip on hover
+      info.el.addEventListener('mouseenter', () => {
+        tooltip.style.display = 'block';
+      });
+      info.el.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+      });
+      
+      // Enhanced styling for timed events
+      if (!info.event.allDay) {
+        info.el.style.minHeight = '25px';
+        info.el.style.fontSize = '11px';
+        info.el.style.fontWeight = 'bold';
+        info.el.style.border = `2px solid ${info.event.borderColor}`;
+      }
+    },
+    
+    // EVENT CLICK HANDLER
+    eventClick: function(info) {
+      const event = info.event;
+      let message = `📋 Task: ${event.title}\n`;
+      message += `🏷️ Priority: ${event.extendedProps.priority}\n`;
+      message += `📂 Type: ${event.extendedProps.type}\n`;
+      
+      if (event.extendedProps.subject) {
+        message += `📚 Subject: ${event.extendedProps.subject}\n`;
+      }
+      
+      if (event.allDay) {
+        message += `📅 Due: ${event.start.toDateString()} (All day)`;
+      } else {
+        const startTime = event.start;
+        message += `📅 Due: ${startTime.toDateString()}\n`;
+        message += `🕐 Time: ${startTime.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}`;
+      }
+      
+      alert(message);
+    },
+    
+    // ERROR HANDLING
+    eventSourceFailure: function(error) {
+      console.error("❌ Calendar event source failed:", error);
+      alert("Failed to load some calendar events. Please refresh the page.");
+    }
+  });
+  
+  // Render the calendar
+  console.log("🎨 Rendering calendar...");
+  calendar.render();
+  
+  // Force update after a short delay
+  setTimeout(() => {
+    if (calendar) {
+      calendar.updateSize();
+      console.log("📏 Calendar size updated");
+    }
+  }, 300);
+  
+  console.log("✅ Calendar initialization complete");
+}
+
+// Helper function to create event tooltips
+function createEventTooltip(event) {
+  const tooltip = document.createElement('div');
+  tooltip.classList.add('task-tooltip');
+  
+  let content = `<strong>${event.title}</strong><br>`;
+  content += `Priority: <span style="color: ${getTooltipPriorityColor(event.extendedProps.priority)}">${event.extendedProps.priority}</span><br>`;
+  content += `Type: ${event.extendedProps.type}<br>`;
+  
+  if (event.extendedProps.subject) {
+    content += `Subject: ${event.extendedProps.subject}<br>`;
+  }
+  
+  if (event.allDay) {
+    content += `<strong>All Day Event</strong><br>`;
+    content += new Date(event.start).toLocaleDateString();
   } else {
-    console.error("Calendar element not found!");
+    const startTime = new Date(event.start);
+    content += `<strong>Scheduled Time</strong><br>`;
+    content += `${startTime.toLocaleDateString()}<br>`;
+    content += `${startTime.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}`;
+  }
+  
+  tooltip.innerHTML = content;
+  return tooltip;
+}
+
+// Helper function for tooltip priority colors
+function getTooltipPriorityColor(priority) {
+  switch(priority?.toLowerCase()) {
+    case 'high': return '#ff6b6b';
+    case 'medium': return '#feca57';
+    case 'low': return '#48dbfb';
+    default: return '#ffffff';
   }
 }
 
-// Add these styles to fix calendar event display issues
-const calendarFixStyles = document.createElement('style');
-calendarFixStyles.textContent = `
-  /* Force timed events to be visible */
-  .fc-timegrid-event {
-    opacity: 1 !important;
-    visibility: visible !important;
-    min-height: 25px !important;
-    padding: 2px 4px !important;
+// Debug function to check current events
+window.debugCalendarEvents = function() {
+  if (calendar) {
+    const events = calendar.getEvents();
+    console.log("📊 CURRENT CALENDAR EVENTS:");
+    console.table(events.map(event => ({
+      title: event.title,
+      start: event.start?.toISOString(),
+      end: event.end?.toISOString(),
+      allDay: event.allDay,
+      id: event.id
+    })));
+  } else {
+    console.log("❌ No calendar instance found");
   }
-  
-  /* Make event time more visible */
-  .fc-event-time {
-    font-weight: bold !important;
-    opacity: 1 !important;
-  }
-  
-  /* Force calendar slots to be visible */
-  .fc-timegrid-slot, .fc-timegrid-slot-lane {
-    height: 40px !important;
-    min-height: 40px !important;
-  }
-  
-  /* Better event styling */
-  .fc-event {
-    border-width: 2px !important;
-    margin: 1px 0 !important;
-  }
-  
-  /* Ensure events aren't hidden by z-index issues */
-  .fc-timegrid-event-harness {
-    z-index: 10 !important;
-  }
-  
-  /* Improve tooltips */
-  .task-tooltip {
-    position: absolute;
-    z-index: 1000;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    display: none;
-    top: 100%;
-    left: 0;
-    min-width: 200px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    pointer-events: none;
-  }
-  
-  /* Reset any Full Calendar properties that might be overridden */
-  .fc .fc-timegrid-col.fc-day-today {
-    background-color: rgba(255, 220, 40, 0.15) !important;
-  }
-  
-  /* Make current time indicator more visible */  
-  .fc-timegrid-now-indicator-line {
-    border-color: #ff3838 !important;
-    border-width: 2px !important;
-  }
-`;
-document.head.appendChild(calendarFixStyles);
+};
 
-// Helper function to get color based on priority
-function getEventColor(priority) {
-  switch(priority) {
-    case "high":
-      return '#dc2626'; // red
-    case "medium":
-      return '#f59e0b'; // yellow
-    default:
-      return '#10b981'; // green
-  }
-}
+// Debug function to test server response
+window.testTasksEndpoint = function() {
+  fetch('/get_tasks')
+    .then(response => response.json())
+    .then(data => {
+      console.log("🔍 SERVER RESPONSE TEST:");
+      console.table(data);
+    })
+    .catch(error => {
+      console.error("❌ Error testing endpoint:", error);
+    });
+};
   
   // Improved: Show User Info with better visibility enforcement
   if (showUserInfoBtn) {
@@ -858,30 +752,30 @@ function getEventColor(priority) {
   }
 
   // Show Task Form button
-if (showFormBtn) {
-  showFormBtn.addEventListener("click", function() {
-    console.log("Show form button clicked");
-    hideAllSections();
-    if (taskForm) {
-      makeVisible(taskForm);
-    } else {
-      console.error("Task form element not found!");
-    }
-  });
-}
+  if (showFormBtn) {
+    showFormBtn.addEventListener("click", function() {
+      console.log("Show form button clicked");
+      hideAllSections();
+      if (taskForm) {
+        makeVisible(taskForm);
+      } else {
+        console.error("Task form element not found!");
+      }
+    });
+  }
 
-// Show Tasks button
-if (showTasksBtn) {
-  showTasksBtn.addEventListener("click", function() {
-    console.log("Show tasks button clicked");
-    hideAllSections();
-    if (taskContainer) {
-      makeVisible(taskContainer);
-    } else {
-      console.error("Task container element not found!");
-    }
-  });
-}
+  // Show Tasks button
+  if (showTasksBtn) {
+    showTasksBtn.addEventListener("click", function() {
+      console.log("Show tasks button clicked");
+      hideAllSections();
+      if (taskContainer) {
+        makeVisible(taskContainer);
+      } else {
+        console.error("Task container element not found!");
+      }
+    });
+  }
   
   // IMPROVED: Filter Toggle Button with better visibility control
   const filterToggle = document.getElementById("filter-toggle");
@@ -907,93 +801,91 @@ if (showTasksBtn) {
       }
     });
   }
-  
-  
 
-// IMPROVED: Show/Hide Subject Field for Add Task
-const taskTypeSelect = document.getElementById('task-type');
-const subjectField = document.getElementById('subject-field');
+  // IMPROVED: Show/Hide Subject Field for Add Task
+  const taskTypeSelect = document.getElementById('task-type');
+  const subjectField = document.getElementById('subject-field');
 
-if (taskTypeSelect && subjectField) {
-  console.log("Task type select and subject field found");
-  
-  // Add event listener for changes
-  taskTypeSelect.addEventListener("change", function() {
-    console.log("Task type changed to:", this.value);
+  if (taskTypeSelect && subjectField) {
+    console.log("Task type select and subject field found");
     
-    if (this.value === "school") {
-      // Force visibility with multiple approaches
-      subjectField.style.display = "block";
-      subjectField.style.visibility = "visible";
-      subjectField.style.opacity = "1";
-      // Remove any classes that might hide it
-      subjectField.classList.remove("hidden");
+    // Add event listener for changes
+    taskTypeSelect.addEventListener("change", function() {
+      console.log("Task type changed to:", this.value);
       
-      // Ensure the input inside is also visible
-      const subjectInput = subjectField.querySelector('input[name="subject"]');
-      if (subjectInput) {
-        subjectInput.style.display = "block";
-        subjectInput.style.visibility = "visible";
-        subjectInput.style.opacity = "1";
+      if (this.value === "school") {
+        // Force visibility with multiple approaches
+        subjectField.style.display = "block";
+        subjectField.style.visibility = "visible";
+        subjectField.style.opacity = "1";
+        // Remove any classes that might hide it
+        subjectField.classList.remove("hidden");
+        
+        // Ensure the input inside is also visible
+        const subjectInput = subjectField.querySelector('input[name="subject"]');
+        if (subjectInput) {
+          subjectInput.style.display = "block";
+          subjectInput.style.visibility = "visible";
+          subjectInput.style.opacity = "1";
+        }
+        
+        console.log("Subject field is now visible:", {
+          display: subjectField.style.display,
+          visibility: subjectField.style.visibility,
+          opacity: subjectField.style.opacity
+        });
+      } else {
+        // Hide the field
+        subjectField.style.display = "none";
+        console.log("Subject field hidden for non-school");
       }
-      
-      console.log("Subject field is now visible:", {
-        display: subjectField.style.display,
-        visibility: subjectField.style.visibility,
-        opacity: subjectField.style.opacity
-      });
-    } else {
-      // Hide the field
-      subjectField.style.display = "none";
-      console.log("Subject field hidden for non-school");
-    }
-  });
-  
-  // IMPORTANT: Trigger the change event on page load to set initial state
-  // This ensures the subject field is visible if "school" is pre-selected
-  const event = new Event('change');
-  taskTypeSelect.dispatchEvent(event);
-}
-
-// IMPROVED: Show/Hide Subject Field for Edit Task Form
-const editTypeSelect = document.getElementById("edit-type");
-const editSubjectField = document.getElementById("edit-subject-field");
-
-if (editTypeSelect && editSubjectField) {
-  console.log("Edit type select and subject field found");
-  
-  // Add event listener for changes
-  editTypeSelect.addEventListener("change", function() {
-    console.log("Edit type changed to:", this.value);
+    });
     
-    if (this.value === "school") {
-      // Force visibility with multiple approaches
-      editSubjectField.style.display = "block";
-      editSubjectField.style.visibility = "visible";
-      editSubjectField.style.opacity = "1";
-      // Remove any classes that might hide it
-      editSubjectField.classList.remove("hidden");
+    // IMPORTANT: Trigger the change event on page load to set initial state
+    // This ensures the subject field is visible if "school" is pre-selected
+    const event = new Event('change');
+    taskTypeSelect.dispatchEvent(event);
+  }
+
+  // IMPROVED: Show/Hide Subject Field for Edit Task Form
+  const editTypeSelect = document.getElementById("edit-type");
+  const editSubjectField = document.getElementById("edit-subject-field");
+
+  if (editTypeSelect && editSubjectField) {
+    console.log("Edit type select and subject field found");
+    
+    // Add event listener for changes
+    editTypeSelect.addEventListener("change", function() {
+      console.log("Edit type changed to:", this.value);
       
-      // Ensure the input inside is also visible
-      const editSubjectInput = editSubjectField.querySelector('input[name="subject"]');
-      if (editSubjectInput) {
-        editSubjectInput.style.display = "block";
-        editSubjectInput.style.visibility = "visible";
-        editSubjectInput.style.opacity = "1";
+      if (this.value === "school") {
+        // Force visibility with multiple approaches
+        editSubjectField.style.display = "block";
+        editSubjectField.style.visibility = "visible";
+        editSubjectField.style.opacity = "1";
+        // Remove any classes that might hide it
+        editSubjectField.classList.remove("hidden");
+        
+        // Ensure the input inside is also visible
+        const editSubjectInput = editSubjectField.querySelector('input[name="subject"]');
+        if (editSubjectInput) {
+          editSubjectInput.style.display = "block";
+          editSubjectInput.style.visibility = "visible";
+          editSubjectInput.style.opacity = "1";
+        }
+        
+        console.log("Edit subject field shown for school");
+      } else {
+        editSubjectField.style.display = "none";
+        console.log("Edit subject field hidden for non-school");
       }
-      
-      console.log("Edit subject field shown for school");
-    } else {
-      editSubjectField.style.display = "none";
-      console.log("Edit subject field hidden for non-school");
-    }
-  });
-  
-  // IMPORTANT: Trigger the change event on page load to set initial state
-  // This ensures the edit subject field is visible if "school" is pre-selected
-  const editEvent = new Event('change');
-  editTypeSelect.dispatchEvent(editEvent);
-}
+    });
+    
+    // IMPORTANT: Trigger the change event on page load to set initial state
+    // This ensures the edit subject field is visible if "school" is pre-selected
+    const editEvent = new Event('change');
+    editTypeSelect.dispatchEvent(editEvent);
+  }
   
   // Setup Edit Task buttons
   document.querySelectorAll('.edit-btn').forEach(button => {
@@ -1016,26 +908,21 @@ if (editTypeSelect && editSubjectField) {
       document.getElementById('edit-date').value = date;
       
       // Convert time from "1:30 PM" to "13:30" format for input
-      if (time) {
+      if (time && time !== 'null' && time !== '') {
         try {
-          const timeParts = time.match(/(\d+):(\d+)\s*([AP]M)/i);
-          if (timeParts) {
-            let hours = parseInt(timeParts[1]);
-            const minutes = timeParts[2];
-            const ampm = timeParts[3].toUpperCase();
-            
-            if (ampm === 'PM' && hours < 12) hours += 12;
-            if (ampm === 'AM' && hours === 12) hours = 0;
-            
-            const timeValue = `${hours.toString().padStart(2, '0')}:${minutes}`;
+          const result = parseTimeString(time);
+          if (result.valid) {
+            const timeValue = `${result.hours.toString().padStart(2, '0')}:${result.minutes.toString().padStart(2, '0')}`;
             document.getElementById('edit-time').value = timeValue;
           } else {
             document.getElementById('edit-time').value = '';
           }
         } catch (e) {
-          console.error("Error parsing time:", e);
+          console.error("Error parsing time for edit:", e);
           document.getElementById('edit-time').value = '';
         }
+      } else {
+        document.getElementById('edit-time').value = '';
       }
       
       document.getElementById('edit-priority').value = priority;
@@ -1135,14 +1022,14 @@ if (editTypeSelect && editSubjectField) {
     });
   });
 
-  console.log("Auto-displaying calendar on page load");
+  console.log("🚀 Auto-displaying calendar on page load");
   hideAllSections();
   showCalendar();
   
   // Handle window resize events
   window.addEventListener('resize', function() {
     if (calendar && calendarEl && calendarEl.style.display !== 'none') {
-      console.log("Window resized, updating calendar size");
+      console.log("📏 Window resized, updating calendar size");
       calendar.updateSize();
     }
   });
