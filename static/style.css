@@ -434,7 +434,7 @@ p {
   }
   
   .footer {
-     position: fixed;
+    position: relative;
     font-size: 14px;
     bottom: 10px;
   }
