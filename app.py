@@ -894,7 +894,7 @@ def check_reminders():
             logger.debug(f"Processing tasks for user: {user_name}, email: {user_email}")
             
             # Verify user has valid email
-            if not user_email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', user_email):
+            if not user_email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}, user_email):
                 logger.warning(f"Invalid or missing email for user {user_id}: {user_email}")
                 continue
 
@@ -913,7 +913,7 @@ def check_reminders():
 
                 # Check if email is valid for notifications
                 task_email = data.get("gmail", user_email)
-                if not task_email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', task_email):
+                if not task_email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}, task_email):
                     logger.warning(f"Invalid email for task {task_id}: {task_email}")
                     # Update the task to reflect this
                     tasks_ref.document(task_id).update({
@@ -922,7 +922,7 @@ def check_reminders():
                     continue
                 
                 # Reset email_verified to True if it was previously false but email is now valid
-                if data.get("email_verified") is False and re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', task_email):
+                if data.get("email_verified") is False and re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}, task_email):
                     tasks_ref.document(task_id).update({
                         "email_verified": True
                     })
@@ -942,7 +942,7 @@ def check_reminders():
                     # Debug information to help diagnose issues
                     logger.debug(f"Task: {title}, Priority: {priority}, Reminder Count: {reminder_count}, Same Day Count: {same_day_reminder_count}")
                     
-                     if last_reminder_time:
+                    if last_reminder_time:
                         try:
                             # Convert string timestamp to datetime object
                             last_reminder_time = datetime.fromisoformat(last_reminder_time)
