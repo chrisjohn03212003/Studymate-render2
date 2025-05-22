@@ -264,7 +264,7 @@ body {
     flex-direction: row;
     align-items: center;
     padding-top: 10px;
-    padding-bottom: 0;
+    padding-bottom: 15px;
     gap: 10px;
   }
   
