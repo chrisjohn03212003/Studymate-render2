@@ -5,6 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import uuid
 import smtplib
+import pytz
 from email.mime.text import MIMEText
 import os
 import re
@@ -41,6 +42,33 @@ db = initialize_firebase()
 # SMTP Gmail Credentials
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "studymatesystem@gmail.com")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "dxmc aueb drbm qvnh")
+
+
+USER_TIMEZONE = pytz.timezone('Asia/Manila')  # Change this to your timezone
+
+def get_user_datetime():
+    """Get current datetime in user's timezone"""
+    return datetime.now(USER_TIMEZONE)
+
+def parse_user_datetime(date_str, time_str):
+    """Parse date and time strings and return timezone-aware datetime in user's timezone"""
+    try:
+        # Parse the date and time
+        if "AM" in time_str.upper() or "PM" in time_str.upper():
+            # Handle AM/PM format
+            full_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %I:%M %p")
+        else:
+            # Handle 24-hour format
+            full_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+        
+        # Make it timezone-aware in user's timezone
+        localized_datetime = USER_TIMEZONE.localize(full_datetime)
+        logger.debug(f"Parsed datetime: {full_datetime} -> Localized: {localized_datetime}")
+        
+        return localized_datetime
+    except Exception as e:
+        logger.error(f"Error parsing datetime from '{date_str}' '{time_str}': {e}")
+        return None
 
 def send_email(user_email, subject, body, retry=1):
     """
