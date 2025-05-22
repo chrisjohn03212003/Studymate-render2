@@ -265,12 +265,11 @@ body {
     align-items: center;
     padding-top: 10px;
     padding-bottom: 30px;
-    margin-bottom: 12px;
-    gap: 15px;
+    gap: 5px;
   }
   
   .logo-container img {
-    width: 50px;
+    width: 90px;
     height: auto;
   }
 
