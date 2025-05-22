@@ -585,7 +585,7 @@ Hello {name},
 Your StudyMate account has been successfully deleted as requested.
 All your account information and tasks have been permanently removed from our system.
 
-If you didn't request this action or have any questions, please contact us.
+If you didn't request this action or have any questions, please contact us on gmail.
 
 Thank you for using StudyMate!
 
@@ -667,56 +667,192 @@ def get_tasks():
     events = []
     for task in user_tasks:
         data = task.to_dict()
-        if "due" in data and "time" in data:
+        if "due" in data:
             try:
-                # Debug
-                logger.debug(f"Processing task for calendar: {data.get('title')}, due: {data.get('due')}, time: {data.get('time')}")
+                # Debug logging
+                logger.debug(f"Processing task: {data.get('title')}")
+                logger.debug(f"Raw due date: {data.get('due')}")
+                logger.debug(f"Raw time: {data.get('time')}")
                 
-                # Parse date and time properly
+                # Get the date
                 due_date = data.get("due")
-                time_str = data.get("time", "00:00")
+                if not due_date:
+                    logger.warning(f"No due date for task: {data.get('title')}")
+                    continue
                 
-                # Handle time format (convert "1:30 PM" format to "13:30" format)
-                try:
-                    # First, try to parse time in "1:30 PM" format
-                    time_obj = datetime.strptime(time_str, "%I:%M %p")
-                    time_24h = time_obj.strftime("%H:%M")
-                except ValueError:
-                    # If that fails, assume it's already in 24-hour format
-                    time_24h = time_str
+                # Get and process the time
+                time_str = data.get("time")
+                processed_time = parse_time_for_calendar(time_str)
                 
-                # Format for FullCalendar ISO8601 format (YYYY-MM-DDThh:mm:ss)
-                start_datetime = f"{due_date}T{time_24h.replace(' ', '')}"
+                # Create the full datetime string for FullCalendar
+                if processed_time:
+                    # Format: 2025-05-22T14:30:00
+                    start_datetime = f"{due_date}T{processed_time}:00"
+                    logger.debug(f"Created datetime: {start_datetime}")
+                else:
+                    # Fallback to all-day event
+                    start_datetime = due_date
+                    logger.debug(f"Using all-day format: {start_datetime}")
                 
                 # Create event object
                 event = {
                     "id": data.get("id", task.id),
                     "title": data.get("title", "No Title"),
                     "start": start_datetime,
-                    "allDay": False,
+                    "allDay": processed_time is None,  # True if no valid time found
                     "extendedProps": {
                         "priority": data.get("priority", "low"),
                         "type": data.get("type", ""),
-                        "subject": data.get("subject", "")
+                        "subject": data.get("subject", ""),
+                        "time": data.get("time", "")  # Keep original for reference
                     }
                 }
                 
                 # Set color based on priority
-                if data.get("priority") == "high":
+                priority = data.get("priority", "low").lower()
+                if priority == "high":
                     event["backgroundColor"] = "#dc2626"  # red
-                elif data.get("priority") == "medium":
-                    event["backgroundColor"] = "#f59e0b"  # yellow
+                    event["borderColor"] = "#dc2626"
+                elif priority == "medium":
+                    event["backgroundColor"] = "#f59e0b"  # amber
+                    event["borderColor"] = "#f59e0b"
                 else:
                     event["backgroundColor"] = "#10b981"  # green
+                    event["borderColor"] = "#10b981"
+                
+                event["textColor"] = "#ffffff"
                 
                 events.append(event)
-                logger.debug(f"Added event: {event}")
+                logger.debug(f"Successfully added event: {event['title']} at {event['start']}")
+                
             except Exception as e:
-                logger.error(f"Error processing task for calendar: {e}")
+                logger.error(f"Error processing task '{data.get('title', 'Unknown')}': {str(e)}")
+                # Continue processing other tasks instead of failing completely
                 continue
 
     logger.info(f"Returning {len(events)} events to calendar")
     return jsonify(events)
+
+
+def parse_time_for_calendar(time_str):
+    """
+    Parse various time formats and return 24-hour format (HH:MM) for FullCalendar
+    Returns None if no valid time can be parsed (for all-day events)
+    """
+    if not time_str or time_str in ['None', 'null', '', 'undefined']:
+        return None
+    
+    time_str = str(time_str).strip()
+    
+    try:
+        # Pattern 1: 12-hour format with AM/PM (e.g., "2:30 PM", "11:45AM", "9 AM")
+        import re
+        am_pm_pattern = r'(\d{1,2}):?(\d{2})?\s*([AaPp][Mm])'
+        am_pm_match = re.search(am_pm_pattern, time_str)
+        
+        if am_pm_match:
+            hours = int(am_pm_match.group(1))
+            minutes = int(am_pm_match.group(2)) if am_pm_match.group(2) else 0
+            period = am_pm_match.group(3).upper()
+            
+            # Convert to 24-hour format
+            if period == 'PM' and hours != 12:
+                hours += 12
+            elif period == 'AM' and hours == 12:
+                hours = 0
+            
+            return f"{hours:02d}:{minutes:02d}"
+        
+        # Pattern 2: 24-hour format (e.g., "14:30", "09:00", "23:45")
+        time_24_pattern = r'(\d{1,2}):(\d{2})'
+        time_24_match = re.search(time_24_pattern, time_str)
+        
+        if time_24_match:
+            hours = int(time_24_match.group(1))
+            minutes = int(time_24_match.group(2))
+            
+            # Validate ranges
+            if 0 <= hours <= 23 and 0 <= minutes <= 59:
+                return f"{hours:02d}:{minutes:02d}"
+        
+        # Pattern 3: Just hours (e.g., "14", "9", "2")
+        hour_only_pattern = r'^(\d{1,2})$'
+        hour_only_match = re.match(hour_only_pattern, time_str)
+        
+        if hour_only_match:
+            hours = int(hour_only_match.group(1))
+            
+            # If it's a reasonable hour, use it
+            if 0 <= hours <= 23:
+                return f"{hours:02d}:00"
+            elif 1 <= hours <= 12:
+                # Assume PM for afternoon hours
+                if hours < 8:
+                    hours += 12
+                return f"{hours:02d}:00"
+        
+        # Pattern 4: Try using datetime parsing as fallback
+        from datetime import datetime
+        
+        # Try common formats
+        formats_to_try = [
+            "%I:%M %p",    # 2:30 PM
+            "%I%p",        # 2PM
+            "%H:%M",       # 14:30
+            "%H",          # 14
+        ]
+        
+        for fmt in formats_to_try:
+            try:
+                time_obj = datetime.strptime(time_str, fmt)
+                return time_obj.strftime("%H:%M")
+            except ValueError:
+                continue
+        
+        # If we get here, we couldn't parse the time
+        logger.warning(f"Could not parse time string: '{time_str}'")
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error parsing time '{time_str}': {str(e)}")
+        return None
+
+
+# Alternative helper function if you prefer a simpler approach
+def simple_time_parser(time_str):
+    """Simplified time parser - less robust but easier to understand"""
+    if not time_str or str(time_str).lower() in ['none', 'null', '']:
+        return None
+    
+    time_str = str(time_str).strip()
+    
+    # Handle AM/PM format
+    if 'AM' in time_str.upper() or 'PM' in time_str.upper():
+        try:
+            from datetime import datetime
+            time_obj = datetime.strptime(time_str, "%I:%M %p")
+            return time_obj.strftime("%H:%M")
+        except ValueError:
+            try:
+                # Try without minutes
+                time_obj = datetime.strptime(time_str, "%I %p")
+                return time_obj.strftime("%H:%M")
+            except ValueError:
+                pass
+    
+    # Handle 24-hour format
+    if ':' in time_str:
+        try:
+            parts = time_str.split(':')
+            hours = int(parts[0])
+            minutes = int(parts[1])
+            if 0 <= hours <= 23 and 0 <= minutes <= 59:
+                return f"{hours:02d}:{minutes:02d}"
+        except (ValueError, IndexError):
+            pass
+    
+    # Default fallback
+    return "09:00"  # 9 AM default
 
 
 def check_reminders():
@@ -1187,14 +1323,28 @@ def init_scheduler():
     atexit.register(lambda: scheduler.shutdown())
     return scheduler
 
+# CRITICAL FIX: Initialize scheduler at module level for Render compatibility
+# This ensures the scheduler starts when the module is imported by gunicorn
+try:
+    scheduler = init_scheduler()
+    logger.info("Scheduler initialized at module level for production deployment")
+except Exception as e:
+    logger.error(f"Failed to initialize scheduler: {e}")
+    scheduler = None
+
 # For Render web services - this is critical
 if __name__ == "__main__":
     # Set port for Render compatibility
     port = int(os.environ.get("PORT", 5000))
     
-    scheduler = init_scheduler()
+    # Only initialize scheduler if not already done at module level
+    if scheduler is None:
+        scheduler = init_scheduler()
     
     # Run the Flask app
     app.run(host="0.0.0.0", port=port)
 else:
-    pass
+    # This block runs when imported by gunicorn
+    logger.info("App imported by WSGI server (gunicorn)")
+    if scheduler is not None:
+        logger.info("Scheduler is running in production mode")
