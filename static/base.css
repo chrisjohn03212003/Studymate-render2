@@ -264,13 +264,13 @@ body {
     flex-direction: row;
     align-items: center;
     padding-top: 10px;
-    padding-bottom: 0px;
+    padding-bottom: 30px;
     margin-bottom: 12px;
     gap: 15px;
   }
   
   .logo-container img {
-    width: 80px;
+    width: 50px;
     height: auto;
   }
 
