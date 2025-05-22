@@ -38,17 +38,9 @@ def initialize_firebase():
 # Initialize Firebase
 db = initialize_firebase()
 
-# SMTP Gmail Credentials - FIXED: Better environment variable handling
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
-SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD") 
-
-# ADDED: Validation for email credentials
-if not SENDER_EMAIL or not SENDER_PASSWORD:
-    logger.error("Email credentials not found in environment variables!")
-    logger.error(f"SENDER_EMAIL: {'SET' if SENDER_EMAIL else 'NOT SET'}")
-    logger.error(f"SENDER_PASSWORD: {'SET' if SENDER_PASSWORD else 'NOT SET'}")
-else:
-    logger.info(f"Email credentials loaded - Sender: {SENDER_EMAIL}")
+# SMTP Gmail Credentials
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "studymatesystem@gmail.com")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "dxmc aueb drbm qvnh")
 
 def send_email(user_email, subject, body, retry=1):
     """
@@ -64,11 +56,6 @@ def send_email(user_email, subject, body, retry=1):
         bool: True if email sent successfully, False otherwise
     """
     
-    # FIXED: Check if email credentials are available
-    if not SENDER_EMAIL or not SENDER_PASSWORD:
-        logger.error("Email credentials not configured. Cannot send email.")
-        return False
-    
     # Email validation regex pattern
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     
@@ -78,23 +65,14 @@ def send_email(user_email, subject, body, retry=1):
         return False
     
     try:
-        # ADDED: More detailed logging for debugging
-        logger.info(f"Attempting to send email to {user_email} with subject: {subject}")
-        logger.debug(f"Using sender email: {SENDER_EMAIL}")
-        
         msg = MIMEText(body)
         msg['Subject'] = subject
         msg['From'] = SENDER_EMAIL
         msg['To'] = user_email
 
-        # Connect to Gmail SMTP server with better error handling
-        logger.debug("Connecting to Gmail SMTP server...")
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=30)  # Added timeout
-        
-        logger.debug("Logging in to Gmail...")
+        # Connect to Gmail SMTP server
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        
-        logger.debug("Sending email...")
         server.sendmail(SENDER_EMAIL, user_email, msg.as_string())
         server.quit()
 
@@ -107,15 +85,6 @@ def send_email(user_email, subject, body, retry=1):
         
     except smtplib.SMTPAuthenticationError as e:
         logger.error(f"SMTP Authentication error: {e}")
-        logger.error("Check your Gmail credentials and app password")
-        return False
-        
-    except smtplib.SMTPServerDisconnected as e:
-        logger.error(f"SMTP Server disconnected: {e}")
-        # Try again if we have retries left
-        if retry > 0:
-            logger.info(f"Retrying... ({retry} attempts left)")
-            return send_email(user_email, subject, body, retry-1)
         return False
         
     except smtplib.SMTPException as e:
@@ -807,7 +776,7 @@ def parse_time_for_calendar(time_str):
                 return f"{hours:02d}:{minutes:02d}"
         
         # Pattern 3: Just hours (e.g., "14", "9", "2")
-        hour_only_pattern = r'^(\d{1,2})
+        hour_only_pattern = r'^(\d{1,2})$'
         hour_only_match = re.match(hour_only_pattern, time_str)
         
         if hour_only_match:
@@ -891,11 +860,6 @@ def check_reminders():
     now = datetime.now()
     logger.info(f"Running reminder check at {now}")
 
-    # ADDED: Check if email credentials are available before processing reminders
-    if not SENDER_EMAIL or not SENDER_PASSWORD:
-        logger.error("Email credentials not configured. Skipping reminder check.")
-        return
-
     try:
         users = db.collection("users").get()
         logger.info(f"Found {len(list(users))} users in the database")
@@ -923,7 +887,7 @@ def check_reminders():
             logger.debug(f"Processing tasks for user: {user_name}, email: {user_email}")
             
             # Verify user has valid email
-            if not user_email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}, user_email):
+            if not user_email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', user_email):
                 logger.warning(f"Invalid or missing email for user {user_id}: {user_email}")
                 continue
 
@@ -942,7 +906,7 @@ def check_reminders():
 
                 # Check if email is valid for notifications
                 task_email = data.get("gmail", user_email)
-                if not task_email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}, task_email):
+                if not task_email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', task_email):
                     logger.warning(f"Invalid email for task {task_id}: {task_email}")
                     # Update the task to reflect this
                     tasks_ref.document(task_id).update({
@@ -951,7 +915,7 @@ def check_reminders():
                     continue
                 
                 # Reset email_verified to True if it was previously false but email is now valid
-                if data.get("email_verified") is False and re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}, task_email):
+                if data.get("email_verified") is False and re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', task_email):
                     tasks_ref.document(task_id).update({
                         "email_verified": True
                     })
@@ -969,8 +933,7 @@ def check_reminders():
                     overdue_reminder_count = data.get("overdue_reminder_count", 0)
                     
                     # Debug information to help diagnose issues
-                    logger.debug(f"Task: {title}, Priority: {priority}, Due: {due_date_str} {due_time_str}")
-                    logger.debug(f"Reminder Count: {reminder_count}, Same Day Count: {same_day_reminder_count}")
+                    logger.debug(f"Task: {title}, Priority: {priority}, Reminder Count: {reminder_count}, Same Day Count: {same_day_reminder_count}")
                     
                     if last_reminder_time:
                         try:
@@ -1145,122 +1108,143 @@ StudyMate System
                         reminder_type = None
                         reminder_urgency = "Reminder"  # Default urgency level
                         
-                        # FIXED: More robust reminder logic with broader time windows
-                        if priority == "high":
-                            logger.debug(f"High priority task - checking reminder conditions")
+                        if 0 <= days_remaining < 1:
+                            # Task is due today
+                            logger.debug(f"Task '{title}' is due today with {hours_remaining:.2f} hours remaining")
                             
-                            # 1 week before (7 days)
-                            if 6.8 <= days_remaining <= 7.2:
-                                should_send_reminder = True
-                                reminder_type = "7 day"
-                                reminder_urgency = "Early"
-                                logger.debug(f"High priority 7-day reminder triggered")
-                            # 3 days before
-                            elif 2.8 <= days_remaining <= 3.2:
-                                should_send_reminder = True
-                                reminder_type = "3 day"
-                                reminder_urgency = "Upcoming"
-                                logger.debug(f"High priority 3-day reminder triggered")
-                            # 1 day before
-                            elif 0.8 <= days_remaining <= 1.2:
-                                should_send_reminder = True
-                                reminder_type = "1 day"
-                                reminder_urgency = "Important"
-                                logger.debug(f"High priority 1-day reminder triggered")
-                            # Same day reminders
-                            elif 0 <= days_remaining < 1:
-                                logger.debug(f"High priority same-day checks - hours remaining: {hours_remaining:.2f}")
+                            # Add detailed debug information
+                            logger.debug(f"Same day reminder count: {same_day_reminder_count}")
+                            logger.debug(f"Priority: {priority}")
+                            
+                            if priority == "high":
+                                # MODIFIED: Updated high priority same-day reminder logic to always send at key timepoints
+                                logger.debug(f"High priority checks - " +
+                                             f"7hr: {6.8 <= hours_remaining <= 7.2}, " +
+                                             f"4hr: {3.8 <= hours_remaining <= 4.2}, " +
+                                             f"2hr: {1.8 <= hours_remaining <= 2.2}, " +
+                                             f"<1hr: {0 < hours_remaining < 1}")
                                 
-                                # Morning reminder (7-8 hours before)
-                                if 6.5 <= hours_remaining <= 8.5:
+                                # First reminder at 7 hours before deadline - always send
+                                if 6.8 <= hours_remaining <= 7.2:
                                     should_send_reminder = True
-                                    reminder_type = f"{int(hours_remaining)} hour"
-                                    reminder_urgency = "Today"
-                                    logger.debug(f"High priority morning reminder triggered")
-                                # Afternoon reminder (4-5 hours before)
-                                elif 3.5 <= hours_remaining <= 5.5:
+                                    reminder_type = "7 hour"
+                                    reminder_urgency = "Upcoming"
+                                    logger.debug(f"High priority 7-hour reminder triggered")
+                                
+                                # Second reminder at 4 hours before deadline - always send
+                                elif 3.8 <= hours_remaining <= 4.2:
                                     should_send_reminder = True
-                                    reminder_type = f"{int(hours_remaining)} hour"
+                                    reminder_type = "4 hour"
                                     reminder_urgency = "Important"
-                                    logger.debug(f"High priority afternoon reminder triggered")
-                                # Evening reminder (1-2 hours before)
-                                elif 1.5 <= hours_remaining <= 2.5:
+                                    logger.debug(f"High priority 4-hour reminder triggered")
+                                
+                                # Third reminder at 2 hours before deadline - always send
+                                elif 1.8 <= hours_remaining <= 2.2:
                                     should_send_reminder = True
-                                    reminder_type = f"{int(hours_remaining)} hour"
+                                    reminder_type = "2 hour" 
                                     reminder_urgency = "Urgent"
-                                    logger.debug(f"High priority evening reminder triggered")
-                                # Final hour - every 15 minutes
-                                elif 0 < hours_remaining <= 1:
+                                    logger.debug(f"High priority 2-hour reminder triggered")
+                                
+                                # Final hour: reminders every 10 minutes (10, 20, 30, 40, 50 mins)
+                                elif 0 < hours_remaining < 1:
                                     minutes_since_last_reminder = float('inf')
                                     if last_reminder_time:
                                         minutes_since_last_reminder = (now - last_reminder_time).total_seconds() / 60
                                     
-                                    if minutes_since_last_reminder >= 15:
+                                    # Check if it's been at least 10 minutes since the last reminder
+                                    if minutes_since_last_reminder >= 10:
                                         should_send_reminder = True
                                         reminder_type = f"{int(minutes_remaining)} minute"
-                                        reminder_urgency = "CRITICAL"
-                                        logger.debug(f"High priority final-hour reminder triggered")
-                        
-                        elif priority == "medium":
-                            logger.debug(f"Medium priority task - checking reminder conditions")
-                            
-                            # 5 days before
-                            if 4.8 <= days_remaining <= 5.2:
-                                should_send_reminder = True
-                                reminder_type = "5 day"
-                                reminder_urgency = "Early"
-                                logger.debug(f"Medium priority 5-day reminder triggered")
-                            # 1 day before
-                            elif 0.8 <= days_remaining <= 1.2:
-                                should_send_reminder = True
-                                reminder_type = "1 day"
-                                reminder_urgency = "Important"
-                                logger.debug(f"Medium priority 1-day reminder triggered")
-                            # Same day reminders
-                            elif 0 <= days_remaining < 1:
-                                logger.debug(f"Medium priority same-day checks - hours remaining: {hours_remaining:.2f}")
+                                        reminder_urgency = "VERY URGENT"
+                                        logger.debug(f"High priority final-hour reminder triggered ({int(minutes_remaining)} min remaining)")
                                 
-                                # Morning reminder (5-7 hours before)
-                                if 5 <= hours_remaining <= 7:
+                            elif priority == "medium":
+                                # MODIFIED: Updated medium priority logic to be more reliable
+                                logger.debug(f"Medium priority checks - 6hr: {5.8 <= hours_remaining <= 7.1}, " +
+                                             f"1hr: {0.8 <= hours_remaining <= 2.1}")
+                                             
+                                if 5.8 <= hours_remaining <= 7.1:
                                     should_send_reminder = True
                                     reminder_type = f"{int(hours_remaining)} hour"
-                                    reminder_urgency = "Today"
-                                    logger.debug(f"Medium priority morning reminder triggered")
-                                # Final reminder (1-2 hours before)
-                                elif 1 <= hours_remaining <= 2:
+                                    reminder_urgency = "Upcoming"
+                                    logger.debug(f"Medium priority same-day reminder triggered at {hours_remaining:.2f} hours")
+                                elif 0.8 <= hours_remaining <= 2.1:
                                     should_send_reminder = True
                                     reminder_type = f"{int(hours_remaining)} hour"
                                     reminder_urgency = "Important"
-                                    logger.debug(f"Medium priority final reminder triggered")
+                                    logger.debug(f"Medium priority same-day reminder triggered at {hours_remaining:.2f} hours")
+                            
+                            elif priority == "low":
+                                # MODIFIED: Updated low priority logic to be more reliable
+                                logger.debug(f"Low priority checks - 3hr: {2.8 <= hours_remaining <= 4.1}")
+                                
+                                if 2.8 <= hours_remaining <= 4.1:
+                                    should_send_reminder = True
+                                    reminder_type = f"{int(hours_remaining)} hour"
+                                    reminder_urgency = "Upcoming"
+                                    logger.debug(f"Low priority same-day reminder triggered at {hours_remaining:.2f} hours")
+                        
+                        elif priority == "high":
+                            # MODIFIED: Updated high priority advance reminder logic to be more reliable
+                            logger.debug(f"High priority advance checks - 7d: {6.8 <= days_remaining <= 7.2}, " +
+                                         f"3d: {2.8 <= days_remaining <= 3.2}, " +
+                                         f"1d: {0.8 <= days_remaining <= 1.2}")
+                            
+                            if 6.8 <= days_remaining <= 7.2:
+                                should_send_reminder = True
+                                reminder_type = f"{int(days_remaining)} day"
+                                reminder_urgency = "Early"
+                                logger.debug(f"High priority reminder triggered at {days_remaining:.2f} days")
+                            elif 2.8 <= days_remaining <= 3.2:
+                                should_send_reminder = True
+                                reminder_type = f"{int(days_remaining)} day"
+                                reminder_urgency = "Upcoming"
+                                logger.debug(f"High priority reminder triggered at {days_remaining:.2f} days")
+                            elif 0.8 <= days_remaining <= 1.2:
+                                should_send_reminder = True
+                                reminder_type = f"{int(days_remaining)} day"
+                                reminder_urgency = "Important"
+                                logger.debug(f"High priority reminder triggered at {days_remaining:.2f} days")
+                        
+                        elif priority == "medium":
+                            # MODIFIED: Updated medium priority advance reminder logic to be more reliable
+                            logger.debug(f"Medium priority advance checks - 5d: {4.8 <= days_remaining <= 5.2}, " +
+                                         f"1d: {0.8 <= days_remaining <= 1.2}")
+                            
+                            if 4.8 <= days_remaining <= 5.2:
+                                should_send_reminder = True
+                                reminder_type = f"{int(days_remaining)} day"
+                                reminder_urgency = "Early"
+                                logger.debug(f"Medium priority reminder triggered at {days_remaining:.2f} days")
+                            elif 0.8 <= days_remaining <= 1.2:
+                                should_send_reminder = True
+                                reminder_type = f"{int(days_remaining)} day"
+                                reminder_urgency = "Important"
+                                logger.debug(f"Medium priority reminder triggered at {days_remaining:.2f} days")
                         
                         elif priority == "low":
-                            logger.debug(f"Low priority task - checking reminder conditions")
+                            # MODIFIED: Updated low priority advance reminder logic to be more reliable
+                            logger.debug(f"Low priority advance checks - 3d: {2.8 <= days_remaining <= 3.2}")
                             
-                            # 3 days before
                             if 2.8 <= days_remaining <= 3.2:
                                 should_send_reminder = True
-                                reminder_type = "3 day"
+                                reminder_type = f"{int(days_remaining)} day"
                                 reminder_urgency = "Upcoming"
-                                logger.debug(f"Low priority 3-day reminder triggered")
-                            # Same day reminder
-                            elif 0 <= days_remaining < 1 and 3 <= hours_remaining <= 5:
-                                should_send_reminder = True
-                                reminder_type = f"{int(hours_remaining)} hour"
-                                reminder_urgency = "Today"
-                                logger.debug(f"Low priority same-day reminder triggered")
+                                logger.debug(f"Low priority reminder triggered at {days_remaining:.2f} days")
                         
-                        # Prevent spam by requiring minimum time between reminders (except for critical ones)
-                        if should_send_reminder and time_since_last_reminder < 2 and reminder_urgency != "CRITICAL":
+                        # Prevent excessive reminders by requiring minimum time between them
+                        # MODIFIED: Only apply this for non-critical reminders
+                        if should_send_reminder and time_since_last_reminder < 1 and hours_remaining >= 2:
                             logger.debug(f"Skipping reminder for task '{title}' - last reminder was too recent ({time_since_last_reminder:.2f} hours ago)")
                             should_send_reminder = False
                         
                         # Send reminder if conditions are met
                         if should_send_reminder:
-                            logger.info(f"Sending {reminder_urgency} {reminder_type} reminder for task '{title}'")
+                            logger.info(f"Sending {reminder_type} reminder for task '{title}'")
                             
-                            # Create specific subject lines with urgency levels
+                            # MODIFIED: Create specific subject lines with urgency levels
                             if "minute" in reminder_type:
-                                subject = f"{reminder_urgency}: {title} - Due in {reminder_type}s!"
+                                subject = f"{reminder_urgency}: {title} - Due in {reminder_type}s"
                                 body = f"""
 Hello {user_name},
 
@@ -1282,7 +1266,7 @@ StudyMate System
                                 body = f"""
 Hello {user_name},
 
-This is a {reminder_urgency.lower()} reminder about your upcoming task:
+This is an {reminder_urgency.lower()} reminder about your upcoming task:
 
 Task: {title}
 Subject: {data.get('subject', 'N/A')}
@@ -1290,7 +1274,7 @@ Type: {data.get('type', 'N/A')}
 Due Date: {due_date_str} at {due_time_str}
 Priority: {priority}
 
-This task is due in {reminder_type}{"s" if not reminder_type.endswith("day") and int(float(reminder_type.split()[0])) > 1 else ""}.
+This task is due in {reminder_type}{"s" if int(float(reminder_type.split()[0])) > 1 else ""}.
 
 Best regards,
 StudyMate System
@@ -1300,7 +1284,7 @@ StudyMate System
                             logger.debug(f"Attempting to send {reminder_urgency} reminder email to {task_email}")
                             
                             if send_email(task_email, subject, body):
-                                logger.info(f"Successfully sent {reminder_urgency} {reminder_type} reminder for task '{title}' to {task_email}")
+                                logger.info(f"Sent {reminder_urgency} {reminder_type} reminder for task '{title}' to {task_email}")
                                 
                                 # Update task counters
                                 update_data = {
@@ -1308,47 +1292,24 @@ StudyMate System
                                     "last_reminder_time": now.isoformat()
                                 }
                                 
-                                # Only increment same_day_reminder_count for same-day reminders
+                                # MODIFIED: Only increment same_day_reminder_count for same-day reminders
                                 # but not for the frequent < 1 hour reminders
-                                if 0 <= days_remaining < 1 and not (reminder_urgency == "CRITICAL"):
+                                if 0 <= days_remaining < 1 and not (priority == "high" and hours_remaining < 1):
                                     update_data["same_day_reminder_count"] = same_day_reminder_count + 1
                                 
                                 # Add debug log for database update
                                 logger.debug(f"Updating task counters: {update_data}")
                                 tasks_ref.document(task_id).update(update_data)
                             else:
-                                logger.error(f"Failed to send {reminder_urgency} reminder for task '{title}' to {task_email}")
+                                logger.error(f"Failed to send reminder for task '{title}' to {task_email}")
                         else:
-                            if priority and days_remaining < 8:  # Only log for tasks within a week
-                                logger.debug(f"Not sending reminder for task '{title}' - conditions not met (priority: {priority}, days: {days_remaining:.2f}, hours: {hours_remaining:.2f})")
+                            logger.debug(f"Not sending reminder for task '{title}' - time window conditions not met")
                 
                 except Exception as e:
                     logger.error(f"Error processing reminders for task {task_id}: {e}")
                     
     except Exception as e:
         logger.error(f"Error in reminder check: {e}")
-
-
-# ADDED: Test function to verify email setup
-def test_email_setup():
-    """Test function to verify email credentials and connectivity"""
-    logger.info("Testing email setup...")
-    
-    if not SENDER_EMAIL or not SENDER_PASSWORD:
-        logger.error("Email credentials not found!")
-        return False
-    
-    try:
-        # Test SMTP connection
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10)
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.quit()
-        logger.info("Email setup test successful!")
-        return True
-    except Exception as e:
-        logger.error(f"Email setup test failed: {e}")
-        return False
-
 
 def init_scheduler():
     """Initialize and start the background scheduler"""
@@ -1358,10 +1319,6 @@ def init_scheduler():
     # Start the scheduler
     scheduler.start()
     logger.info("Scheduler started, running check_reminders every 5 minutes")
-    
-    # ADDED: Test email setup on startup
-    test_email_setup()
-    
     # Register a shutdown function to close scheduler on exit
     atexit.register(lambda: scheduler.shutdown())
     return scheduler
@@ -1391,5 +1348,3 @@ else:
     logger.info("App imported by WSGI server (gunicorn)")
     if scheduler is not None:
         logger.info("Scheduler is running in production mode")
-    else:
-        logger.error("Scheduler failed to initialize in production mode!")
