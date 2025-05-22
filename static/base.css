@@ -264,9 +264,9 @@ body {
     flex-direction: row;
     align-items: center;
     padding-top: 10px;
-    padding-bottom: 25px;
+    padding-bottom: 0px;
     margin-bottom: 12px;
-    gap: 10px;
+    gap: 15px;
   }
   
   .logo-container img {
@@ -277,8 +277,8 @@ body {
   /* Hero section adjustments */
   .hero-section-with-logos {
     padding-top: 120px;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
   
   .hero-title {
