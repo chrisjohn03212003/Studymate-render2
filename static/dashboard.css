@@ -63,7 +63,7 @@ body {
 
 .logo-container img:nth-child(2) {
   animation: logoPulse 2s infinite alternate;
-  animation-delay: 4s;
+  animation-delay: 4s; /* Second logo starts pulsing 1 second after the first */
 }
 
 @keyframes logoPulse {
@@ -76,6 +76,17 @@ body {
     filter: drop-shadow(0 0 15px rgba(234, 0, 255, 0.8));
   }
 }
+
+
+/* Make sure footer is responsive */
+@media (max-width: 768px) {
+  .footer {
+    font-size: 16px;
+    bottom: 10px;
+    left: 15px;
+  }
+}
+
 
 .container {
   max-width: 1200px;
@@ -189,7 +200,6 @@ h2 {
   text-align: center;
   font-size: 28px;
   margin-bottom: 25px;
-  position: relative;
   animation: slideInUp 0.8s ease-out;
 }
 
@@ -202,6 +212,7 @@ h2::after {
   height: 2px;
   background: linear-gradient(90deg, #00fdfd, transparent);
 }
+
 
 /* Button Styles */
 .button-row {
@@ -275,16 +286,13 @@ form {
   background-color: rgba(30, 30, 47, 0.6);
   border-radius: 18px;
   box-shadow: 0 0 22px rgba(85, 215, 247, 0.9);
-  padding: 25px;
+  padding: 25px; /* Increased padding for better spacing */
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 50px;
   max-height: 490px;
-  /* FIXED: Combined animations properly */
-  animation: 
-    slideIn 0.5s ease-out forwards,
-    breathingShadow 4s ease-in-out infinite 0.5s;
+  animation-duration: 5s;
 }
 
 /* FIX: Updated form-group to ensure proper positioning */
@@ -294,11 +302,11 @@ form {
   width: 100%;
 }
 
-/* FIXED: Corrected icon positioning */
+/* FIXED: Separate icon positioning for task form inputs */
 .form-group .input-icon {
   position: absolute;
   left: 15px;
-  top: 50%; /* FIXED: Changed from 20px to 50% for proper centering */
+  top: 20px;
   transform: translateY(-50%);
   color: #ea00ff;
   font-size: 18px;
@@ -312,7 +320,7 @@ form {
 
 .form-group input,
 .form-group select,
-.form-group textarea { /* FIXED: Changed from invalid 'text' to 'textarea' */
+.form-group text {
   width: 100%;
   padding: 12px 15px 12px 40px;
   border: 1px solid rgba(5, 212, 249, 0.836);
@@ -325,7 +333,7 @@ form {
 
 .form-group input:focus,
 .form-group select:focus,
-.form-group textarea:focus { /* FIXED: Changed from invalid 'text' to 'textarea' */
+.form-group text:focus {
   outline: none;
   border-color: #892682;
   box-shadow: 0 0 0 2px rgba(5, 217, 232, 0.2);
@@ -353,10 +361,7 @@ form {
   min-height: 600px;
   opacity: 1 !important;
   visibility: visible !important;
-  /* FIXED: Combined animations properly */
-  animation: 
-    slideIn 0.5s ease-out forwards,
-    breathingShadow 4s ease-in-out infinite 0.5s;
+  animation-duration: 4.5s;
 }
 
 .fc .fc-toolbar-title {
@@ -440,7 +445,7 @@ form {
 /* Optional: Add a tooltip on hover to see full event title */
 .fc-event:hover {
   overflow: visible;
-  z-index: 15; /* FIXED: Changed from 10 to 15 to avoid conflict with logo */
+  z-index: 10;
 }
 
 /* Fix for events that start late in the day */
@@ -473,10 +478,7 @@ form {
   overflow: hidden;
   margin-bottom: 30px;
   box-shadow: 0 0 22px rgba(85, 215, 247, 0.9);
-  /* FIXED: Combined animations properly */
-  animation: 
-    slideIn 0.5s ease-out forwards,
-    breathingShadow 4s ease-in-out infinite 0.5s;
+  animation-duration: 6s;
 }
 
 .task-list-header {
@@ -527,6 +529,7 @@ form {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  
 }
 
 .badge-school {
@@ -710,27 +713,24 @@ form {
 /* FIXED: Improved User Info Styles with better spacing and alignment */
 .user-info-display {
   background: rgba(15, 23, 42, 0.6);
-  padding: 30px;
+  padding: 30px; /* Increased padding for better spacing */
   border-radius: var(--border-radius);
   margin-bottom: 20px;
   border: 1px solid rgba(5, 217, 232, 0.2);
   box-shadow: 0 0 22px rgba(85, 215, 247, 0.9);
-  /* FIXED: Combined animations properly */
-  animation: 
-    slideIn 0.5s ease-out forwards,
-    breathingShadow 4s ease-in-out infinite 0.5s;
+  animation-duration: 4s;
 }
 
 /* FIXED: Created a separate class for user form inputs */
 .user-info-display .form-group input,
 .user-info-display .form-group select {
-  padding-left: 40px;
+  padding-left: 40px; /* Make room for the icon */
 }
 
 /* FIXED: Updated user-data-row to better handle icon alignment */
 .user-data-row {
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 20px; /* Increased spacing between rows */
   align-items: center;
   position: relative;
 }
@@ -739,7 +739,6 @@ form {
 .user-data-icon {
   position: absolute;
   left: 12px;
-  top: 50%; /* FIXED: Changed from undefined to 50% for proper centering */
   transform: translateY(-50%);
   color: #00fdfd;
   z-index: 2;
@@ -759,7 +758,7 @@ form {
   color: rgb(228, 255, 20);
   flex: 3;
   font-size: 23px;
-  padding-left: 40px;
+  padding-left: 40px; /* Make room for the icon */
 }
 
 /* Animation Classes */
@@ -823,15 +822,74 @@ form {
   }
 }
 
-@keyframes breathingShadow {
-  0% {
-    box-shadow: 0 0 10px rgba(85, 215, 247, 0.5), 0 0 20px rgba(234, 0, 255, 0.2);
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .button-row {
+    flex-direction: column;
+    align-items: stretch;
   }
-  50% {
-    box-shadow: 0 0 25px rgba(85, 215, 247, 0.8), 0 0 40px rgba(234, 0, 255, 0.4);
+  
+  .task-list-header,
+  .task-item {
+    grid-template-columns: 1fr 1fr;
   }
-  100% {
-    box-shadow: 0 0 10px rgba(85, 215, 247, 0.5), 0 0 20px rgba(234, 0, 255, 0.2);
+  
+  .task-header-details,
+  .task-details {
+    display: none;
+  }
+  
+  .user-data-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .user-data-row label {
+    margin-bottom: 5px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-container img {
+    height: 60px;
+  }
+  
+  .task-list-header,
+  .task-item {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .task-actions {
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .task-header-date,
+  .task-date {
+    display: none;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .filter-form {
+    flex-direction: column;
+  }
+  
+  .filter-buttons {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
   }
 }
 
@@ -850,6 +908,11 @@ form {
   0% { box-shadow: 0 0 5px rgba(5, 217, 232, 0.5); }
   50% { box-shadow: 0 0 15px rgba(5, 217, 232, 0.8); }
   100% { box-shadow: 0 0 5px rgba(5, 217, 232, 0.5); }
+}
+
+/* Apply animations */
+.calendar, .task-list-container, .user-info-display, form {
+  animation: slideIn 0.5s ease-out forwards;
 }
 
 .animate__fadeIn {
@@ -918,23 +981,32 @@ body::after {
   background: rgba(5, 217, 232, 0.5);
 }
 
-/* === FIXED AND COMPLETE MEDIA QUERIES === */
+@keyframes breathingShadow {
+  0% {
+    box-shadow: 0 0 10px rgba(85, 215, 247, 0.5), 0 0 20px rgba(234, 0, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(85, 215, 247, 0.8), 0 0 40px rgba(234, 0, 255, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(85, 215, 247, 0.5), 0 0 20px rgba(234, 0, 255, 0.2);
+  }
+}
+
+.user-info-display, form, .task-list-container, .calendar {
+  animation: breathingShadow 4s ease-in-out infinite;
+}
+
 
 /* Small mobile devices (portrait phones) */
 @media (max-width: 480px) {
-  .footer {
-    font-size: 16px;
-    bottom: 10px;
-    left: 15px;
-  }
-
   /* Logo positioning for small screens */
   .logo-container {
     position: relative;
     top: 10px;
     left: 0;
     display: flex;
-    justify-content: center;
+   justify-content: center;
     align-items: center;
     gap: 10px;
     width: 100%;
@@ -942,14 +1014,14 @@ body::after {
   }
   
   .logo-container img {
-    width: 100px;
+    width: 100px; /* Smaller logo size for mobile */
     height: auto;
   }
   
   /* Dashboard title */
   h1.welcome-title {
     font-size: 24px;
-    margin-top: 60px;
+    margin-top: 60px; /* Make room for repositioned logo */
     padding-bottom: 5px;
   }
   
@@ -1007,7 +1079,7 @@ body::after {
     gap: 10px;
   }
   
-  /* View options for calendar */
+  /* View options for calendar (month/week/day) */
   .fc-button-group {
     display: flex;
     width: 100%;
@@ -1045,13 +1117,13 @@ body::after {
   /* Fix form layout for mobile */
   form {
     padding: 15px;
-    max-height: none;
+    max-height: none; /* Remove max-height restriction on mobile */
   }
   
   .form-group input,
   .form-group select,
   .form-group textarea {
-    font-size: 16px;
+    font-size: 16px; /* Prevents iOS zoom on input focus */
     padding: 10px 10px 10px 35px;
   }
   
@@ -1083,7 +1155,7 @@ body::after {
     display: none;
   }
   
-  /* Fix task action buttons */
+  /* Fix task action buttons size and positioning */
   .task-actions {
     justify-content: flex-end;
   }
@@ -1125,8 +1197,9 @@ body::after {
   }
 }
 
-/* Small devices (large phones, 481px to 767px) */
+/* Small devices (large phones, 481px and up) */
 @media (min-width: 481px) and (max-width: 767px) {
+  /* Logo adjustments */
   .logo-container {
     position: relative;
     top: 10px;
@@ -1138,11 +1211,13 @@ body::after {
     width: 120px;
   }
   
+  /* Dashboard title */
   h1.welcome-title {
     font-size: 28px;
-    margin-top: 80px;
+    margin-top: 80px; /* Make room for logo */
   }
   
+  /* Button adjustments */
   .button-row {
     flex-wrap: wrap;
     justify-content: center;
@@ -1157,6 +1232,7 @@ body::after {
     font-size: 0.9rem;
   }
   
+  /* Calendar specific tablet fixes */
   .calendar {
     min-height: 400px;
     padding: 15px;
@@ -1166,6 +1242,7 @@ body::after {
     font-size: 1.2rem;
   }
   
+  /* Task list adjustments */
   .task-list-header,
   .task-item {
     grid-template-columns: 2fr 1fr 1fr;
@@ -1177,8 +1254,9 @@ body::after {
   }
 }
 
-/* Medium devices (tablets, 768px to 1023px) */
+/* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) and (max-width: 1023px) {
+  /* Logo positioning for tablets - centered at top */
   .logo-container {
     position: relative;
     top: 0;
@@ -1197,6 +1275,7 @@ body::after {
     height: auto;
   }
   
+  /* Dashboard title - positioned below logos */
   h1.welcome-title {
     font-size: 28px;
     margin-top: 20px;
@@ -1205,10 +1284,12 @@ body::after {
     width: 100%;
   }
   
+  /* Main content container adjustments */
   .main-content {
     padding-top: 20px;
   }
   
+  /* Button adjustments for tablets */
   .button-row {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -1224,11 +1305,13 @@ body::after {
     min-width: 150px;
   }
   
+  /* Calendar dimensions for tablets */
   .calendar {
     min-height: 500px;
     margin-top: 20px;
   }
   
+  /* Calendar navigation adjustments */
   .calendar-nav {
     margin-bottom: 15px;
   }
@@ -1239,7 +1322,7 @@ body::after {
   }
 }
 
-/* Portrait tablet specific */
+/* Portrait tablet specific adjustments */
 @media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
   .logo-container {
     padding: 25px 0;
@@ -1255,6 +1338,7 @@ body::after {
     margin-top: 25px;
   }
   
+  /* Adjust button layout for portrait */
   .button-row {
     max-width: 600px;
     margin: 0 auto 20px;
@@ -1266,7 +1350,7 @@ body::after {
   }
 }
 
-/* Landscape tablet specific */
+/* Landscape tablet specific adjustments */
 @media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
   .logo-container {
     padding: 15px 0;
@@ -1282,6 +1366,7 @@ body::after {
     margin-top: 15px;
   }
   
+  /* Compact layout for landscape */
   .main-content {
     padding-top: 15px;
   }
@@ -1290,6 +1375,7 @@ body::after {
     min-height: 400px;
   }
   
+  /* Button layout for landscape tablets */
   .button-row {
     max-width: 800px;
     margin: 0 auto 15px;
@@ -1302,298 +1388,10 @@ body::after {
   }
 }
 
-/* Large devices (desktops, 1024px and up) */
-@media (min-width: 1024px) {
-  .logo-container {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: auto;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 30px;
-    padding: 0;
-    z-index: 10;
-  }
-  
-  .logo-container img {
-    width: 160px;
-    height: auto;
-  }
-  
-  h1.welcome-title {
-    font-size: 38px;
-    margin-top: 20px;
-    margin-bottom: 25px;
-    text-align: center;
-    width: 100%;
-  }
-  
-  .button-row {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  button {
-    padding: 0.8rem 2rem;
-    font-size: 18px;
-    min-width: 180px;
-    flex: 0 1 auto;
-  }
-  
-  .calendar {
-    min-height: 600px;
-    padding: 20px;
-    margin-bottom: 50px;
-  }
-  
-  .fc .fc-toolbar-title {
-    font-size: 1.5rem;
-  }
-  
-  .fc .fc-button {
-    padding: 6px 12px;
-    font-size: 0.9rem;
-  }
-  
-  .task-list-header,
-  .task-item {
-    grid-template-columns: 2fr 2fr 1fr 1fr;
-    font-size: 1rem;
-  }
-  
-  .task-item {
-    font-size: 20px;
-  }
-  
-  .task-header-details,
-  .task-details,
-  .task-header-date,
-  .task-date {
-    display: block;
-  }
-  
-  .user-info-display {
-    padding: 30px;
-  }
-  
-  .user-data-row label {
-    font-size: 20px;
-    width: 150px;
-  }
-  
-  .user-data-row span {
-    font-size: 23px;
-  }
-  
-  .footer {
-    position: absolute;
-    bottom: 15px;
-    left: 20px;
-    font-size: 18px;
-    text-align: left;
-    width: auto;
-  }
-}
 
-/* Extra large devices (large desktops, 1200px and up) */
-@media (min-width: 1200px) {
-  .container {
-    max-width: 1200px;
-    padding: 20px 40px;
-  }
-  
-  .logo-container img {
-    width: 180px;
-  }
-  
-  h1.welcome-title {
-    font-size: 42px;
-    margin-bottom: 30px;
-  }
-  
-  button {
-    padding: 1rem 2.5rem;
-    font-size: 20px;
-    min-width: 200px;
-  }
-  
-  .calendar {
-    min-height: 700px;
-    padding: 30px;
-  }
-  
-  .fc .fc-toolbar-title {
-    font-size: 1.8rem;
-  }
-  
-  form {
-    padding: 35px;
-    max-width: 800px;
-    margin: 0 auto 50px;
-  }
-  
-  .form-group {
-    margin-bottom: 25px;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 15px 15px 15px 45px;
-    font-size: 1.1rem;
-  }
-  
-  .task-list-header,
-  .task-item {
-    padding: 20px;
-  }
-  
-  .action-btn {
-    padding: 8px 15px;
-    font-size: 0.9rem;
-  }
-}
-
-/* Ultra-wide screens (1440px and up) */
-@media (min-width: 1440px) {
-  .container {
-    max-width: 1400px;
-    padding: 30px 60px;
-  }
-  
-  .logo-container {
-    top: 30px;
-    left: 30px;
-    gap: 40px;
-  }
-  
-  .logo-container img {
-    width: 200px;
-  }
-  
-  h1.welcome-title {
-    font-size: 48px;
-    margin-top: 30px;
-    margin-bottom: 40px;
-  }
-  
-  .button-row {
-    gap: 30px;
-    max-width: 1000px;
-  }
-  
-  button {
-    padding: 1.2rem 3rem;
-    font-size: 22px;
-    min-width: 220px;
-  }
-  
-  .calendar {
-    min-height: 800px;
-    padding: 40px;
-  }
-  
-  form {
-    max-width: 900px;
-    padding: 40px;
-  }
-  
-  .footer {
-    bottom: 25px;
-    left: 30px;
-    font-size: 20px;
-  }
-}
-
-/* 4K and beyond (2560px and up) */
-@media (min-width: 2560px) {
-  body {
-    font-size: 18px;
-  }
-  
-  .container {
-    max-width: 1800px;
-    padding: 40px 80px;
-  }
-  
-  .logo-container {
-    top: 40px;
-    left: 40px;
-    gap: 50px;
-  }
-  
-  .logo-container img {
-    width: 240px;
-  }
-  
-  h1.welcome-title {
-    font-size: 56px;
-    margin-top: 40px;
-    margin-bottom: 50px;
-  }
-  
-  .button-row {
-    gap: 40px;
-    max-width: 1200px;
-  }
-  
-  button {
-    padding: 1.5rem 3.5rem;
-    font-size: 24px;
-    min-width: 250px;
-  }
-  
-  .calendar {
-    min-height: 900px;
-    padding: 50px;
-  }
-  
-  .fc .fc-toolbar-title {
-    font-size: 2.2rem;
-  }
-  
-  form {
-    max-width: 1000px;
-    padding: 50px;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 20px 20px 20px 50px;
-    font-size: 1.3rem;
-  }
-  
-  .task-item {
-    font-size: 24px;
-    padding: 25px;
-  }
-  
-  .user-data-row label {
-    font-size: 24px;
-  }
-  
-  .user-data-row span {
-    font-size: 26px;
-  }
-  
-  .footer {
-    bottom: 35px;
-    left: 40px;
-    font-size: 22px;
-  }
-}
-
-/* Landscape orientation fixes for small screens */
+/* Additional fixes for orientation changes */
 @media (orientation: landscape) and (max-height: 600px) {
+  /* Handle landscape mode on phones */
   .logo-container {
     position: relative;
     top: 5px;
@@ -1609,7 +1407,7 @@ body::after {
     font-size: 22px;
     margin-top: 10px;
     margin-bottom: 15px;
-    margin-left: 0;
+    margin-left: 0; /* Reset margin for phones */
     text-align: center;
   }
   
@@ -1622,17 +1420,20 @@ body::after {
     font-size: 0.9rem;
   }
   
+  /* Compact calendar for landscape phones */
   .calendar {
     min-height: 300px;
     padding: 10px;
     margin-bottom: 15px;
   }
   
+  /* Ensure proper scrolling in landscape */
   body {
     height: auto;
     overflow-y: auto;
   }
   
+  /* Compact forms */
   form {
     padding: 10px;
   }
@@ -1641,8 +1442,7 @@ body::after {
     margin-bottom: 10px;
   }
 }
-
-/* iPhone X and newer notch support */
+/* Fix for iPhone X and newer (handling the notch) */
 @supports (padding: max(0px)) {
   .container, 
   .logo-container,
@@ -1656,8 +1456,9 @@ body::after {
   }
 }
 
-/* Critical Calendar Mobile Fixes */
+/* === Critical Fixes for Calendar in Mobile View === */
 @media (max-width: 767px) {
+  /* Calendar navigation buttons */
   .fc .fc-prev-button,
   .fc .fc-next-button,
   .fc .fc-today-button {
@@ -1666,6 +1467,7 @@ body::after {
     font-size: 0.8rem;
   }
   
+  /* View buttons (month/week/day) */
   .fc-button-group {
     display: flex;
     width: 100%;
@@ -1678,27 +1480,32 @@ body::after {
     min-width: 0;
   }
   
+  /* Make calendar cells more usable on mobile */
   .fc-scrollgrid-sync-inner {
     min-height: 30px;
   }
   
+  /* Hide week numbers if present */
   .fc-timegrid-axis,
   .fc-daygrid-week-number {
     display: none;
   }
   
+  /* Ensure events are visible but compact */
   .fc-event {
     padding: 2px;
     font-size: 0.65rem;
   }
   
+  /* Make sure "today" highlight is visible */
   .fc-day-today {
     background-color: rgba(5, 217, 232, 0.2) !important;
   }
 }
 
-/* Enhanced Calendar View for Mobile */
+/* === Enhancement for the Specific Calendar View in Screenshot === */
 @media (max-width: 480px) {
+  /* Targeted fix for the calendar view buttons */
   .calendar .fc-button-group {
     display: flex;
     width: 100%;
@@ -1724,6 +1531,7 @@ body::after {
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2) !important;
   }
   
+  /* Week view specific styles (match the screenshot) */
   .fc-timeGridWeek-view .fc-col-header-cell {
     padding: 2px;
   }
@@ -1733,11 +1541,13 @@ body::after {
     padding: 2px;
   }
   
+  /* Time column */
   .fc-timegrid-slot-label {
     font-size: 0.7rem;
     padding: 0 2px;
   }
   
+  /* Today navigation button */
   .fc-today-button {
     background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)) !important;
     border: none !important;
@@ -1745,6 +1555,7 @@ body::after {
     font-weight: bold !important;
   }
   
+  /* Fix the navigation arrows */
   .fc-prev-button, .fc-next-button {
     background: rgba(15, 23, 42, 0.8) !important;
     border: 1px solid var(--neon-blue) !important;
