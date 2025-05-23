@@ -358,8 +358,14 @@ body {
 /* Small to medium devices (large phones and small tablets) */
 @media (min-width: 481px) and (max-width: 768px) {
   .logo-container {
-    justify-content: space-around;
-    padding: 0 10px;
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
   }
   
   .logo-container img {
@@ -367,7 +373,7 @@ body {
   }
   
   .hero-section-with-logos {
-    padding-top: 85px;
+    padding-top: 120px;
     padding-left: 20px;
     padding-right: 20px;
   }
@@ -456,23 +462,6 @@ body {
 @media (min-width: 481px) and (max-width: 768px) {
   body {
     font-size: 17px;
-  }
-  
-  .logo-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    z-index: 10;
-  }
-  
-  .logo-container img {
-    width: 110px;
-  }
-  
-  .hero-section-with-logos {
-    padding-top: 100px;
-    position: relative;
   }
   
   .hero-title {
