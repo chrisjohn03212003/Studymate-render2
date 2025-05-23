@@ -1256,25 +1256,103 @@ body::after {
 
 /* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Logo positioning for tablets */
+  /* Logo positioning for tablets - moved to prevent overlap */
   .logo-container {
-    top: 15px;
-    left: 15px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
   }
   
   .logo-container img {
-    width: 140px;
+    width: 120px;
+    height: auto;
   }
   
-  /* Dashboard title */
+  /* Dashboard title - adjusted to account for logo space */
   h1.welcome-title {
-    font-size: 32px;
-    margin-top: 30px;
+    font-size: 28px;
+    margin-top: 40px;
+    margin-left: 160px; /* Push title right to avoid logo overlap */
+    text-align: left;
+  }
+  
+  /* Main content container adjustments */
+  .main-content {
+    padding-top: 80px; /* Ensure content doesn't overlap with logo */
+  }
+  
+  /* Button adjustments for tablets */
+  .button-row {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    margin: 5px;
   }
   
   /* Calendar dimensions for tablets */
   .calendar {
     min-height: 500px;
+    margin-top: 20px;
+  }
+  
+  /* Calendar navigation adjustments */
+  .calendar-nav {
+    margin-bottom: 15px;
+  }
+  
+  .calendar-nav button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Portrait tablet specific adjustments */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+  .logo-container {
+    top: 25px;
+    left: 25px;
+  }
+  
+  .logo-container img {
+    width: 100px;
+  }
+  
+  h1.welcome-title {
+    font-size: 26px;
+    margin-left: 140px;
+    margin-top: 35px;
+  }
+}
+
+/* Landscape tablet specific adjustments */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
+  .logo-container {
+    top: 15px;
+    left: 20px;
+  }
+  
+  .logo-container img {
+    width: 90px;
+  }
+  
+  h1.welcome-title {
+    font-size: 24px;
+    margin-left: 130px;
+    margin-top: 25px;
+  }
+  
+  /* Compact layout for landscape */
+  .main-content {
+    padding-top: 60px;
+  }
+  
+  .calendar {
+    min-height: 400px;
   }
 }
 
@@ -1296,6 +1374,8 @@ body::after {
     font-size: 22px;
     margin-top: 10px;
     margin-bottom: 15px;
+    margin-left: 0; /* Reset margin for phones */
+    text-align: center;
   }
   
   .button-row {
@@ -1307,7 +1387,7 @@ body::after {
     font-size: 0.9rem;
   }
   
-  /* Compact calendar for landscape */
+  /* Compact calendar for landscape phones */
   .calendar {
     min-height: 300px;
     padding: 10px;
@@ -1329,7 +1409,6 @@ body::after {
     margin-bottom: 10px;
   }
 }
-
 /* Fix for iPhone X and newer (handling the notch) */
 @supports (padding: max(0px)) {
   .container, 
