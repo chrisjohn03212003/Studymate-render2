@@ -437,6 +437,22 @@ body {
 /* Common tweaks for better mobile performance */
 @media (max-width: 768px) {
   /* Optimize animations for better performance on mobile */
+
+   .logo-container {
+     position: relative;
+     top: 0;
+     right: ;
+     display: flex;
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: 30px;
+    gap: 5px;
+  }
+  
+  .logo-container img {
+    width: 90px;
+    height: auto;
+  }
   @keyframes logoPulse {
     0% {
       transform: scale(1);
