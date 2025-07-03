@@ -1249,6 +1249,11 @@ except Exception as e:
     logger.error(f"Failed to initialize scheduler: {e}")
     scheduler = None
 
+@app.route("/ping")
+def ping():
+    return "OK", 200
+
+
 # For Render web services - this is critical
 if __name__ == "__main__":
     # Set port for Render compatibility
